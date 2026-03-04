@@ -3,18 +3,43 @@ import path from "path";
 import type { Item } from "./models";
 
 const DATA_FILE = path.join(process.cwd(), "data", "inventory.json");
+const BLOB_PATH = "urban-supply-inventory.json";
 const KV_KEY = "us-inventory";
 
 export interface Store {
   items: Item[];
 }
 
-// Use Vercel KV when env vars are present (production), otherwise use JSON file (local dev)
+const isBlobEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 const isKvEnabled = Boolean(
   process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN
 );
 
-// ─── KV store (Vercel / production) ──────────────────────────────────────────
+// ─── Vercel Blob (preferred production store) ─────────────────────────────────
+
+async function readBlob(): Promise<Store> {
+  try {
+    const { list } = await import("@vercel/blob");
+    const { blobs } = await list({ prefix: BLOB_PATH });
+    if (!blobs.length) return readFile(); // fall back to seeded file on first run
+    const res = await fetch(blobs[0].url, { cache: "no-store" });
+    if (!res.ok) return readFile();
+    return (await res.json()) as Store;
+  } catch (err) {
+    console.warn("[store] Blob read failed, falling back to file:", err);
+    return readFile();
+  }
+}
+
+async function writeBlob(store: Store): Promise<void> {
+  const { put } = await import("@vercel/blob");
+  await put(BLOB_PATH, JSON.stringify(store, null, 2), {
+    access: "public",
+    addRandomSuffix: false,
+  });
+}
+
+// ─── Vercel KV (legacy fallback) ─────────────────────────────────────────────
 
 async function readKv(): Promise<Store> {
   try {
@@ -22,7 +47,7 @@ async function readKv(): Promise<Store> {
     const data = await kv.get<Store>(KV_KEY);
     return data ?? { items: [] };
   } catch (err) {
-    console.warn("[store] KV unavailable, falling back to file store:", err);
+    console.warn("[store] KV read failed, falling back to file:", err);
     return readFile();
   }
 }
@@ -32,12 +57,12 @@ async function writeKv(store: Store): Promise<void> {
     const { kv } = await import("@vercel/kv");
     await kv.set(KV_KEY, store);
   } catch (err) {
-    console.warn("[store] KV write failed, falling back to file store:", err);
+    console.warn("[store] KV write failed, falling back to file:", err);
     await writeFile(store);
   }
 }
 
-// ─── JSON file store (local dev) ─────────────────────────────────────────────
+// ─── JSON file (local dev) ────────────────────────────────────────────────────
 
 async function readFile(): Promise<Store> {
   try {
@@ -49,16 +74,25 @@ async function readFile(): Promise<Store> {
 }
 
 async function writeFile(store: Store): Promise<void> {
-  await fs.mkdir(path.dirname(DATA_FILE), { recursive: true });
-  await fs.writeFile(DATA_FILE, JSON.stringify(store, null, 2), "utf-8");
+  try {
+    await fs.mkdir(path.dirname(DATA_FILE), { recursive: true });
+    await fs.writeFile(DATA_FILE, JSON.stringify(store, null, 2), "utf-8");
+  } catch (err) {
+    // Vercel serverless filesystem is read-only — configure BLOB_READ_WRITE_TOKEN
+    console.warn("[store] file write failed (read-only filesystem):", err);
+  }
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 export async function readStore(): Promise<Store> {
-  return isKvEnabled ? readKv() : readFile();
+  if (isBlobEnabled) return readBlob();
+  if (isKvEnabled) return readKv();
+  return readFile();
 }
 
 export async function writeStore(store: Store): Promise<void> {
-  return isKvEnabled ? writeKv(store) : writeFile(store);
+  if (isBlobEnabled) return writeBlob(store);
+  if (isKvEnabled) return writeKv(store);
+  return writeFile(store);
 }

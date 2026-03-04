@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx";
 import { excelColumnsConfig } from "./excelColumnsConfig";
-import type { Item, InventoryStatus } from "./models";
+import type { Item } from "./models";
 
 type ColKey = keyof typeof excelColumnsConfig;
 

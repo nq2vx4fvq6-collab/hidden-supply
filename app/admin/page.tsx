@@ -4,7 +4,6 @@ import StatusBadge from "@/components/StatusBadge";
 
 export default async function AdminDashboard() {
   const [stats, items] = await Promise.all([getStats(), getAllItems()]);
-
   const realizedProfit = stats.soldRevenue - stats.soldCost;
 
   const statCards = [
