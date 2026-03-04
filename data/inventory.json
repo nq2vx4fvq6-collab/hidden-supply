@@ -1,0 +1,58 @@
+{
+  "items": [
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "sku": "SUP-HOOD-001",
+      "brand": "Supreme",
+      "name": "Box Logo Hoodie FW18",
+      "category": "Hoodie",
+      "size": "L",
+      "condition": "9/10",
+      "colorway": "Grey/Red",
+      "cost": 450,
+      "listPrice": 750,
+      "status": "available",
+      "images": [],
+      "acquisitionDate": "2024-11-01",
+      "notes": "Very clean, minimal cracking on box logo.",
+      "createdAt": "2024-11-01T00:00:00.000Z",
+      "updatedAt": "2024-11-01T00:00:00.000Z"
+    },
+    {
+      "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+      "sku": "BAPE-TEE-003",
+      "brand": "BAPE",
+      "name": "College Logo Tee",
+      "category": "Tee",
+      "size": "M",
+      "condition": "8/10",
+      "colorway": "White/Green",
+      "cost": 80,
+      "listPrice": 140,
+      "status": "available",
+      "images": [],
+      "acquisitionDate": "2024-10-20",
+      "notes": "Slight fading from washes.",
+      "createdAt": "2024-10-20T00:00:00.000Z",
+      "updatedAt": "2024-10-20T00:00:00.000Z"
+    },
+    {
+      "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+      "sku": "GDEPT-JEANS-010",
+      "brand": "Gallery Dept",
+      "name": "Flared Denim",
+      "category": "Jeans",
+      "size": "32",
+      "condition": "9/10",
+      "colorway": "Indigo",
+      "cost": 650,
+      "listPrice": 1100,
+      "status": "reserved",
+      "images": [],
+      "acquisitionDate": "2024-09-05",
+      "notes": "Reserved for VIP client.",
+      "createdAt": "2024-09-05T00:00:00.000Z",
+      "updatedAt": "2024-09-05T00:00:00.000Z"
+    }
+  ]
+}
