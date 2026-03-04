@@ -5,8 +5,9 @@ import LogoutButton from "@/components/LogoutButton";
 const navLinks = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/items", label: "Inventory" },
+  { href: "/admin/sales", label: "Sales" },
   { href: "/admin/items/new", label: "Add Item" },
-  { href: "/admin/import-export", label: "Import / Export" },
+  { href: "/admin/import-export", label: "Excel" },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
