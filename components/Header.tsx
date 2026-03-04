@@ -21,6 +21,15 @@ export default function Header() {
           <Link href="/" className="transition-colors hover:text-zinc-200">
             Catalog
           </Link>
+          <Link
+            href="/login"
+            title="Admin"
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-zinc-800 text-zinc-700 transition-colors hover:border-zinc-600 hover:text-zinc-400"
+          >
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+          </Link>
         </nav>
       </div>
     </header>
