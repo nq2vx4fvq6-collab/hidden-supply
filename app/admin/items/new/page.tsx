@@ -21,15 +21,16 @@ export default function NewItemPage() {
       </div>
 
       <form
+        id="item-form"
         action={createItemAction}
         className="space-y-5 rounded-2xl border border-zinc-800 bg-zinc-900/20 p-6"
       >
         <ItemFormFields />
 
-        <div className="flex items-center gap-4 border-t border-zinc-800 pt-5">
+        <div className="flex flex-wrap items-center gap-4 border-t border-zinc-800 pt-5">
           <button
             type="submit"
-            className="rounded-full bg-zinc-100 px-6 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-black transition-colors hover:bg-white"
+            className="rounded-full bg-accent px-6 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-accent-foreground transition-opacity hover:opacity-90"
           >
             Add to Inventory
           </button>
@@ -39,6 +40,19 @@ export default function NewItemPage() {
           >
             Cancel
           </Link>
+        </div>
+
+        {/* Sticky save bar */}
+        <div className="sticky bottom-0 left-0 right-0 z-10 mt-8 flex items-center justify-between gap-4 rounded-xl border border-zinc-800 bg-zinc-950/95 px-4 py-3 backdrop-blur sm:mx-0">
+          <span className="text-xs text-zinc-500">
+            Item is added when you click below.
+          </span>
+          <button
+            type="submit"
+            className="rounded-full bg-accent px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent-foreground transition-opacity hover:opacity-90"
+          >
+            Add to inventory
+          </button>
         </div>
       </form>
     </div>

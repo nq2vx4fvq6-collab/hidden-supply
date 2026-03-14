@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { getStats, getAllItems } from "@/lib/inventoryService";
 import StatusBadge from "@/components/StatusBadge";
+import SalesCharts from "@/components/SalesCharts";
+import type { MonthlyData, BrandData, StatusData } from "@/components/SalesCharts";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
   const [stats, items] = await Promise.all([getStats(), getAllItems()]);
@@ -53,8 +57,60 @@ export default async function AdminDashboard() {
     )
     .slice(0, 6);
 
+  // ── Chart data ────────────────────────────────────────────────────────────
+  const soldItems = items.filter((i) => i.status === "sold");
+
+  // Monthly revenue / profit over time
+  const monthMap = new Map<string, MonthlyData>();
+  for (const item of soldItems) {
+    if (!item.soldDate) continue;
+    const d = new Date(item.soldDate);
+    const key = `${d.toLocaleString("default", { month: "short" })} ${String(d.getFullYear()).slice(2)}`;
+    const prev = monthMap.get(key) ?? { month: key, revenue: 0, cost: 0, profit: 0, units: 0 };
+    const revenue = item.salePrice ?? 0;
+    const cost = item.cost ?? 0;
+    monthMap.set(key, {
+      ...prev,
+      revenue: prev.revenue + revenue,
+      cost: prev.cost + cost,
+      profit: prev.profit + (revenue - cost),
+      units: prev.units + 1,
+    });
+  }
+  const parseMonthKey = (s: string) => new Date(`${s.slice(0, 3)} 20${s.slice(-2)}`);
+  const monthly: MonthlyData[] = Array.from(monthMap.values()).sort(
+    (a, b) => parseMonthKey(a.month).getTime() - parseMonthKey(b.month).getTime()
+  );
+
+  // Brand breakdown
+  const brandMap = new Map<string, BrandData>();
+  for (const item of soldItems) {
+    const brand = item.brand ?? "Unknown";
+    const prev = brandMap.get(brand) ?? { brand, revenue: 0, profit: 0, units: 0 };
+    const revenue = item.salePrice ?? 0;
+    const cost = item.cost ?? 0;
+    brandMap.set(brand, {
+      ...prev,
+      revenue: prev.revenue + revenue,
+      profit: prev.profit + (revenue - cost),
+      units: prev.units + 1,
+    });
+  }
+  const brands: BrandData[] = Array.from(brandMap.values()).sort(
+    (a, b) => b.revenue - a.revenue
+  );
+
+  // Inventory status donut
+  const statusBreakdown: StatusData[] = [
+    { name: "Available",  value: stats.available,  color: "#34d399" },
+    { name: "Reserved",   value: stats.reserved,   color: "#fbbf24" },
+    { name: "Sold",       value: stats.sold,        color: "#71717a" },
+    { name: "Consigned",  value: stats.consigned,  color: "#60a5fa" },
+    { name: "In Transit", value: stats.inTransit,  color: "#a78bfa" },
+  ];
+
   return (
-    <div className="space-y-10">
+    <div className="page-enter space-y-10">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
@@ -63,7 +119,7 @@ export default async function AdminDashboard() {
         <div className="flex gap-2">
           <Link
             href="/admin/items/new"
-            className="rounded-full bg-zinc-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-black transition-colors hover:bg-white"
+            className="rounded-full bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-accent-foreground transition-all duration-200 hover:opacity-90 active:scale-[0.97]"
           >
             + Add Item
           </Link>
@@ -121,6 +177,9 @@ export default async function AdminDashboard() {
           </div>
         ))}
       </div>
+
+      {/* Analytics Charts */}
+      <SalesCharts monthly={monthly} brands={brands} statusBreakdown={statusBreakdown} />
 
       {/* Recent Items */}
       <div>

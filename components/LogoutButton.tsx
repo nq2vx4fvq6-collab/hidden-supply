@@ -10,7 +10,7 @@ export default function LogoutButton() {
   const handleLogout = async () => {
     setPending(true);
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
+    router.push("/admin/login");
     router.refresh();
   };
 
@@ -18,7 +18,7 @@ export default function LogoutButton() {
     <button
       onClick={handleLogout}
       disabled={pending}
-      className="text-[11px] text-zinc-600 transition-colors hover:text-zinc-400 disabled:opacity-40"
+      className="text-[11px] text-zinc-600 transition-all duration-200 hover:text-accent active:scale-[0.95] disabled:opacity-40 disabled:cursor-not-allowed"
     >
       {pending ? "Signing out…" : "Sign out"}
     </button>

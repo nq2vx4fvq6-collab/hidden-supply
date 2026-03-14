@@ -1,4 +1,5 @@
 import type { Item } from "@/lib/models";
+import ItemImageEditor from "@/components/ItemImageEditor";
 
 const BRANDS = [
   "Supreme",
@@ -235,18 +236,7 @@ export default function ItemFormFields({ item }: { item?: Partial<Item> }) {
       </div>
 
       {/* Image URLs */}
-      <div>
-        <label className={labelClass}>Image URLs (comma-separated)</label>
-        <input
-          name="images"
-          defaultValue={item?.images?.join(", ")}
-          placeholder="https://cdn.example.com/photo1.jpg, https://..."
-          className={inputClass}
-        />
-        <p className="mt-1 text-[10px] text-zinc-600">
-          Paste direct image URLs separated by commas
-        </p>
-      </div>
+      <ItemImageEditor defaultImages={item?.images ?? []} />
     </div>
   );
 }

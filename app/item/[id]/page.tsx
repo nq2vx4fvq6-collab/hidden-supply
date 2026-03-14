@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getItemById } from "@/lib/inventoryService";
 import Header from "@/components/Header";
 import StatusBadge from "@/components/StatusBadge";
+import ImageGallery from "@/components/ImageGallery";
 
 interface ItemPageProps {
   params: Promise<{ id: string }>;
@@ -15,112 +16,133 @@ export default async function ItemPage({ params }: ItemPageProps) {
   if (!item) notFound();
 
   return (
-    <div className="min-h-screen bg-black text-zinc-50">
+    <div className="min-h-screen bg-[#F6F1E6] text-[#050608]">
       <Header />
 
-      <main className="mx-auto max-w-5xl px-6 py-10">
-        <Link
-          href="/"
-          className="mb-8 inline-block text-[11px] uppercase tracking-[0.25em] text-zinc-500 transition-colors hover:text-zinc-200"
-        >
-          ← Back to Catalog
-        </Link>
+      <main className="page-enter mx-auto max-w-7xl px-6 py-10 md:py-14">
 
-        <div className="grid gap-10 md:grid-cols-[1.1fr,0.9fr]">
-          {/* Images */}
-          <div className="space-y-3">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-950">
-              {item.images?.[0] ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={item.images[0]}
-                  alt={item.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-xs uppercase tracking-[0.35em] text-zinc-700">
-                  Urban Supply
-                </div>
-              )}
-            </div>
+        {/* Breadcrumb */}
+        <nav className="mb-10 flex items-center gap-2 text-[9px] uppercase tracking-[0.3em]">
+          <Link href="/" className="text-[#7A7A7A] transition-colors hover:text-[#050608]">
+            Hidden Supply
+          </Link>
+          <span className="text-[#C4C4C4]">/</span>
+          <Link href="/#inventory" className="text-[#7A7A7A] transition-colors hover:text-[#050608]">
+            Inventory
+          </Link>
+          <span className="text-[#C4C4C4]">/</span>
+          <span className="text-[#050608]">{item.brand}</span>
+        </nav>
 
-            {item.images && item.images.length > 1 && (
-              <div className="flex gap-2">
-                {item.images.slice(1).map((src, i) => (
-                  <div
-                    key={i}
-                    className="relative h-20 w-16 overflow-hidden rounded-xl border border-zinc-900 bg-zinc-950"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={src}
-                      alt={`${item.name} photo ${i + 2}`}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
+        <div className="grid gap-12 md:grid-cols-[1fr_420px] md:gap-20">
+
+          {/* ── Images ── */}
+          <div>
+            <ImageGallery images={item.images ?? []} alt={item.name} />
           </div>
 
-          {/* Details */}
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.3em] text-zinc-500">
+          {/* ── Details ── */}
+          <div className="flex flex-col gap-7">
+
+            {/* Brand + Status row */}
+            <div className="flex items-start justify-between gap-4">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.4em] text-[#7A7A7A]">
                 {item.brand}
               </p>
-              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                {item.name}
-              </h1>
-              <p className="text-sm text-zinc-400">
-                {item.category} · Size {item.size}
-                {item.colorway && ` · ${item.colorway}`}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4">
-              {item.listPrice && (
-                <p className="text-2xl font-semibold text-zinc-50">
-                  ${item.listPrice.toLocaleString()}
-                </p>
-              )}
               <StatusBadge status={item.status} />
             </div>
 
-            {item.condition && (
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.25em] text-zinc-500">
-                  Condition
-                </p>
-                <p className="mt-1 text-sm text-zinc-200">{item.condition}</p>
-              </div>
+            {/* Name */}
+            <h1 className="text-2xl font-black uppercase leading-tight tracking-tight text-[#050608] sm:text-3xl">
+              {item.name}
+            </h1>
+
+            {/* Price */}
+            {item.listPrice && (
+              <p className="text-2xl font-semibold text-[#050608]">
+                ${item.listPrice.toLocaleString()}
+              </p>
             )}
 
-            {item.notes && (
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.25em] text-zinc-500">
-                  Notes
-                </p>
-                <p className="mt-1 text-sm text-zinc-300">{item.notes}</p>
-              </div>
-            )}
+            {/* Divider */}
+            <div className="h-px bg-[rgba(5,6,8,0.08)]" />
 
-            <div className="space-y-3 rounded-2xl border border-zinc-900 bg-zinc-950/60 p-4">
-              <p className="text-[11px] uppercase tracking-[0.25em] text-zinc-500">
-                Inquire
+            {/* Inventory metadata */}
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-5">
+              {[
+                { label: "Category",  value: item.category                           },
+                { label: "Size",      value: item.size                               },
+                { label: "Condition", value: item.condition   ?? null                },
+                { label: "Colorway",  value: item.colorway    ?? null                },
+                { label: "SKU",       value: item.sku,  mono: true                  },
+              ]
+                .filter((r) => r.value)
+                .map(({ label, value, mono }) => (
+                  <div key={label}>
+                    <dt className="text-[9px] font-semibold uppercase tracking-[0.3em] text-[#7A7A7A]">
+                      {label}
+                    </dt>
+                    <dd className={`mt-1 text-sm text-[#050608] ${mono ? "font-mono text-xs" : "font-medium"}`}>
+                      {value}
+                    </dd>
+                  </div>
+                ))}
+            </dl>
+
+            {/* Divider */}
+            <div className="h-px bg-[rgba(5,6,8,0.08)]" />
+
+            {/* Access CTA */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="h-1.5 w-1.5 rounded-full bg-[#86C15A]" />
+                <p className="text-[9px] font-semibold uppercase tracking-[0.35em] text-[#7A7A7A]">
+                  How to Purchase
+                </p>
+              </div>
+              <p className="text-sm leading-relaxed text-[#7A7A7A]">
+                DM us on Instagram or WhatsApp with reference{" "}
+                <span className="font-mono text-xs font-medium text-[#050608]">{item.sku}</span>
+                {" "}— fast replies and same-day shipping available through the Hidden Supply network.
               </p>
-              <p className="text-sm leading-relaxed text-zinc-300">
-                Interested in this piece? Reach out with SKU{" "}
-                <span className="font-mono text-xs text-zinc-100">
-                  {item.sku}
-                </span>{" "}
-                via Instagram, WhatsApp, or email and we&apos;ll confirm
-                availability and pricing.
-              </p>
+
+              <div className="flex flex-col gap-3 pt-1 sm:flex-row">
+                <a
+                  href="https://www.instagram.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-1 items-center justify-center gap-2 bg-[#050608] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#F6F1E6] transition-all duration-200 hover:bg-[#86C15A] hover:text-[#050608] active:scale-[0.98]"
+                >
+                  Instagram DM
+                </a>
+                <a
+                  href="https://wa.me/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-1 items-center justify-center gap-2 border border-[rgba(5,6,8,0.18)] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#050608] transition-all duration-200 hover:bg-[#050608] hover:text-[#F6F1E6] active:scale-[0.98]"
+                >
+                  WhatsApp
+                </a>
+              </div>
             </div>
+
           </div>
         </div>
       </main>
+
+      <footer className="mt-16 border-t border-[rgba(5,6,8,0.08)] bg-[#050608] px-6 py-8">
+        <div className="mx-auto max-w-7xl flex items-center justify-between">
+          <p className="text-[9px] uppercase tracking-[0.3em] text-[#3A3A3A]">
+            Hidden Supply · Private Reseller Network
+          </p>
+          <Link
+            href="/#inventory"
+            className="text-[9px] uppercase tracking-[0.25em] text-[#7A7A7A] transition-colors hover:text-[#F6F1E6]"
+          >
+            ← Back to Inventory
+          </Link>
+        </div>
+      </footer>
     </div>
   );
 }

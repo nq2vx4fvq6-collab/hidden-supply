@@ -6,6 +6,8 @@ import DeleteButton from "@/components/DeleteButton";
 import QuickStatusSelect from "@/components/QuickStatusSelect";
 import MarkSoldButton from "@/components/MarkSoldButton";
 import AdminFilters from "@/components/AdminFilters";
+import { bulkUpdateStatusAction } from "@/app/actions/items";
+import PurgeImagesButton from "@/components/PurgeImagesButton";
 
 const VALID_STATUSES: InventoryStatus[] = [
   "available",
@@ -33,6 +35,7 @@ export default async function AdminItemsPage({
   const items = await getAllItems({ search, status });
 
   const TABLE_HEADERS = [
+    "Select",
     "SKU",
     "Brand",
     "Name",
@@ -50,7 +53,7 @@ export default async function AdminItemsPage({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="page-enter space-y-6">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Inventory</h1>
@@ -59,16 +62,17 @@ export default async function AdminItemsPage({
             {search || status ? " matched" : " total"}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <PurgeImagesButton />
           <Link
             href="/admin/import-export"
-            className="rounded-full border border-zinc-700 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400 transition-colors hover:border-zinc-500 hover:text-zinc-200"
+            className="rounded-full border border-zinc-700 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400 transition-colors hover:border-accent/50 hover:text-accent"
           >
             Import / Export
           </Link>
           <Link
             href="/admin/items/new"
-            className="rounded-full bg-zinc-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-black transition-colors hover:bg-white"
+            className="rounded-full bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-accent-foreground transition-all duration-200 hover:opacity-90 active:scale-[0.97]"
           >
             + Add Item
           </Link>
@@ -84,8 +88,34 @@ export default async function AdminItemsPage({
         <AdminFilters />
       </Suspense>
 
-      <div className="overflow-x-auto rounded-2xl border border-zinc-800">
-        <table className="w-full whitespace-nowrap text-sm">
+      {/* Bulk actions + table in one form */}
+      {items.length > 0 ? (
+        <form action={bulkUpdateStatusAction} className="space-y-3">
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/30 px-4 py-2">
+            <span className="text-[10px] uppercase tracking-[0.25em] text-zinc-500">
+              Update selected to
+            </span>
+            <select
+              name="status"
+              required
+              className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs text-zinc-200 outline-none focus:border-zinc-600"
+            >
+              {VALID_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s.charAt(0).toUpperCase() + s.slice(1).replace("_", " ")}
+                </option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="rounded-full bg-accent px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent-foreground transition-all duration-200 hover:opacity-90 active:scale-[0.97]"
+            >
+              Apply
+            </button>
+          </div>
+
+          <div className="overflow-x-auto rounded-2xl border border-zinc-800">
+            <table className="w-full whitespace-nowrap text-sm">
           <thead className="border-b border-zinc-800 bg-zinc-900/50">
             <tr>
               {TABLE_HEADERS.map((h) => (
@@ -99,35 +129,6 @@ export default async function AdminItemsPage({
             </tr>
           </thead>
           <tbody>
-            {items.length === 0 && (
-              <tr>
-                <td
-                  colSpan={TABLE_HEADERS.length}
-                  className="px-4 py-12 text-center text-sm text-zinc-600"
-                >
-                  {search || status ? (
-                    <>
-                      No items match your filters.{" "}
-                      <Link href="/admin/items" className="underline">
-                        Clear filters
-                      </Link>
-                    </>
-                  ) : (
-                    <>
-                      No items yet.{" "}
-                      <Link href="/admin/items/new" className="underline">
-                        Add your first item
-                      </Link>{" "}
-                      or{" "}
-                      <Link href="/admin/import-export" className="underline">
-                        import from Excel
-                      </Link>
-                      .
-                    </>
-                  )}
-                </td>
-              </tr>
-            )}
             {items.map((item, i) => {
               const margin =
                 item.cost && item.listPrice
@@ -149,6 +150,14 @@ export default async function AdminItemsPage({
                   key={item.id}
                   className={`transition-colors hover:bg-zinc-900/30 ${i < items.length - 1 ? "border-b border-zinc-900" : ""}`}
                 >
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      name="ids"
+                      value={item.id}
+                      className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-zinc-100 focus:ring-zinc-500"
+                    />
+                  </td>
                   <td className="px-4 py-3 font-mono text-[11px] text-zinc-500">
                     {item.sku}
                   </td>
@@ -213,7 +222,55 @@ export default async function AdminItemsPage({
             })}
           </tbody>
         </table>
-      </div>
+          </div>
+        </form>
+      ) : (
+        <div className="overflow-x-auto rounded-2xl border border-zinc-800">
+          <table className="w-full whitespace-nowrap text-sm">
+            <thead className="border-b border-zinc-800 bg-zinc-900/50">
+              <tr>
+                {TABLE_HEADERS.map((h) => (
+                  <th
+                    key={h}
+                    className="px-4 py-3 text-left text-[10px] font-normal uppercase tracking-[0.25em] text-zinc-500"
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td
+                  colSpan={TABLE_HEADERS.length}
+                  className="px-4 py-12 text-center text-sm text-zinc-600"
+                >
+                  {search || status ? (
+                    <>
+                      No items match your filters.{" "}
+                      <Link href="/admin/items" className="underline">
+                        Clear filters
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      No items yet.{" "}
+                      <Link href="/admin/items/new" className="underline">
+                        Add your first item
+                      </Link>{" "}
+                      or{" "}
+                      <Link href="/admin/import-export" className="underline">
+                        import from Excel
+                      </Link>
+                      .
+                    </>
+                  )}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

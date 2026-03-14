@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# local uploads (dev fallback when BLOB_READ_WRITE_TOKEN not set)
+/public/uploads
+
 # production
 /build
 
@@ -36,6 +39,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# claude code
+.claude/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.env*.local

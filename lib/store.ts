@@ -1,5 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
+import { unstable_noStore as noStore } from "next/cache";
 import type { Item } from "./models";
 
 const DATA_FILE = path.join(process.cwd(), "data", "inventory.json");
@@ -18,6 +19,7 @@ const isKvEnabled = Boolean(
 // ─── Vercel Blob (preferred production store) ─────────────────────────────────
 
 async function readBlob(): Promise<Store> {
+  noStore(); // always fetch fresh inventory — never serve a cached response
   try {
     const { list } = await import("@vercel/blob");
     const { blobs } = await list({ prefix: BLOB_PATH });
@@ -32,11 +34,17 @@ async function readBlob(): Promise<Store> {
 }
 
 async function writeBlob(store: Store): Promise<void> {
-  const { put } = await import("@vercel/blob");
-  await put(BLOB_PATH, JSON.stringify(store, null, 2), {
-    access: "public",
-    addRandomSuffix: false,
-  });
+  try {
+    const { put } = await import("@vercel/blob");
+    await put(BLOB_PATH, JSON.stringify(store, null, 2), {
+      access: "public",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+    });
+  } catch (err) {
+    console.error("[store] Blob write failed:", err);
+    throw err;
+  }
 }
 
 // ─── Vercel KV (legacy fallback) ─────────────────────────────────────────────

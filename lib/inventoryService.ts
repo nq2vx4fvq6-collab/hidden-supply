@@ -1,10 +1,28 @@
 import { randomUUID } from "crypto";
 import { readStore, writeStore } from "./store";
 import { applyItemFilters } from "./filters";
+import {
+  isSheetsConfigured,
+  fetchItemsFromSheet,
+  appendItemToSheet,
+  updateItemInSheet,
+} from "./googleSheetsService";
 import type { Item, ItemFilters, InventoryStatus } from "./models";
 
-export async function getAllItems(filters?: ItemFilters): Promise<Item[]> {
+async function getItemsSource(): Promise<Item[]> {
+  if (isSheetsConfigured()) {
+    try {
+      return await fetchItemsFromSheet();
+    } catch {
+      return (await readStore()).items;
+    }
+  }
   const { items } = await readStore();
+  return items;
+}
+
+export async function getAllItems(filters?: ItemFilters): Promise<Item[]> {
+  const items = await getItemsSource();
   if (!filters || Object.values(filters).every((v) => v === undefined || v === "")) {
     return items;
   }
@@ -12,7 +30,7 @@ export async function getAllItems(filters?: ItemFilters): Promise<Item[]> {
 }
 
 export async function getItemById(id: string): Promise<Item | undefined> {
-  const { items } = await readStore();
+  const items = await getItemsSource();
   return items.find((i) => i.id === id);
 }
 
@@ -24,6 +42,13 @@ export async function createItem(
   const item: Item = { ...data, id: randomUUID(), createdAt: now, updatedAt: now };
   store.items.push(item);
   await writeStore(store);
+  if (isSheetsConfigured()) {
+    try {
+      await appendItemToSheet(item);
+    } catch (err) {
+      console.error("[inventoryService] push to sheet failed:", err);
+    }
+  }
   return item;
 }
 
@@ -41,6 +66,13 @@ export async function updateItem(
     updatedAt: new Date().toISOString(),
   };
   await writeStore(store);
+  if (isSheetsConfigured()) {
+    try {
+      await updateItemInSheet(id, data);
+    } catch (err) {
+      console.error("[inventoryService] update in sheet failed:", err);
+    }
+  }
   return store.items[idx];
 }
 
@@ -58,7 +90,7 @@ export async function clearAllItems(): Promise<void> {
 }
 
 export async function getStats() {
-  const { items } = await readStore();
+  const items = await getItemsSource();
   const soldItems = items.filter((i) => i.status === "sold");
   const activeItems = items.filter(
     (i) => i.status !== "sold" && i.status !== "archived"

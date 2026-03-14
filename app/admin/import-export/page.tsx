@@ -34,7 +34,7 @@ export default function ImportExportPage() {
           <a
             href="/api/export"
             download
-            className="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-5 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-black transition-colors hover:bg-white"
+            className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-accent-foreground transition-opacity hover:opacity-90"
           >
             Download .xlsx
           </a>

@@ -52,7 +52,7 @@ export default function LoginForm() {
           placeholder="Admin password"
           required
           autoFocus
-          className="w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-zinc-600 transition-colors"
+          className="w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none transition-all duration-200 focus:border-zinc-500 focus:shadow-[0_0_0_3px_rgba(255,255,255,0.04)]"
         />
       </div>
 
@@ -61,7 +61,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-full bg-zinc-100 py-2.5 text-xs font-semibold uppercase tracking-[0.25em] text-black transition-colors hover:bg-white disabled:opacity-50"
+        className="w-full rounded-full bg-accent py-2.5 text-xs font-semibold uppercase tracking-[0.25em] text-accent-foreground transition-all duration-200 hover:opacity-90 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? "Signing in…" : "Sign In"}
       </button>

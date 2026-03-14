@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { getAllItems } from "@/lib/inventoryService";
 
+export const dynamic = "force-dynamic";
+
 export default async function SalesPage() {
   const allItems = await getAllItems();
 
@@ -52,7 +54,7 @@ export default async function SalesPage() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="page-enter space-y-8">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Sales</h1>

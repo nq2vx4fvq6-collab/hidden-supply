@@ -13,9 +13,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Urban Supply — Curated Streetwear",
-  description:
-    "Premium streetwear inventory. Supreme, BAPE, Gallery Dept, and more.",
+  title: "Hidden Supply — Private Reseller Network",
+  description: "Private access to trusted inventory.",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: { index: false, follow: false },
+  },
 };
 
 export default function RootLayout({
@@ -24,9 +29,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="bg-black text-zinc-50">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-black font-sans antialiased text-zinc-50`}
       >
         {children}
       </body>
