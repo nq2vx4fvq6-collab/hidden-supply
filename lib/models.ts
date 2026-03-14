@@ -26,6 +26,8 @@ export interface Item {
   notes?: string;
   createdAt?: string;
   updatedAt?: string;
+  /** Where this item is listed (e.g. eBay account id). */
+  listedOnPlatforms?: { platform: string; accountId: string; externalListingId?: string }[];
 }
 
 export interface ItemFilters {

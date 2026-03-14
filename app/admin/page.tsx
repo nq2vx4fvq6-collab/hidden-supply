@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { getStats, getAllItems } from "@/lib/inventoryService";
 import StatusBadge from "@/components/StatusBadge";
-import SalesCharts from "@/components/SalesCharts";
+import AdminDashboardCharts from "@/components/AdminDashboardCharts";
+import AdminExpandableStats from "@/components/AdminExpandableStats";
 import type { MonthlyData, BrandData, StatusData } from "@/components/SalesCharts";
 
 export const dynamic = "force-dynamic";
@@ -10,33 +11,12 @@ export default async function AdminDashboard() {
   const [stats, items] = await Promise.all([getStats(), getAllItems()]);
   const realizedProfit = stats.soldRevenue - stats.soldCost;
 
-  const statCards = [
+  const primaryStats = [
+    { label: "Total Items", value: stats.total, sub: "in inventory", color: "text-zinc-50" },
+    { label: "Available", value: stats.available, sub: "ready to sell", color: "text-emerald-400" },
+    { label: "Sold", value: stats.sold, sub: "units moved", color: "text-zinc-400" },
     {
-      label: "Total Items",
-      value: stats.total,
-      sub: "in inventory",
-      color: "text-zinc-50",
-    },
-    {
-      label: "Available",
-      value: stats.available,
-      sub: "ready to sell",
-      color: "text-emerald-400",
-    },
-    {
-      label: "Reserved",
-      value: stats.reserved,
-      sub: "held for clients",
-      color: "text-amber-400",
-    },
-    {
-      label: "Sold",
-      value: stats.sold,
-      sub: "units moved",
-      color: "text-zinc-400",
-    },
-    {
-      label: "Active Inventory Value",
+      label: "Active Value",
       value: `$${stats.activeListValue.toLocaleString()}`,
       sub: "at list price",
       color: "text-zinc-50",
@@ -57,10 +37,8 @@ export default async function AdminDashboard() {
     )
     .slice(0, 6);
 
-  // ── Chart data ────────────────────────────────────────────────────────────
+  // Chart data
   const soldItems = items.filter((i) => i.status === "sold");
-
-  // Monthly revenue / profit over time
   const monthMap = new Map<string, MonthlyData>();
   for (const item of soldItems) {
     if (!item.soldDate) continue;
@@ -82,7 +60,6 @@ export default async function AdminDashboard() {
     (a, b) => parseMonthKey(a.month).getTime() - parseMonthKey(b.month).getTime()
   );
 
-  // Brand breakdown
   const brandMap = new Map<string, BrandData>();
   for (const item of soldItems) {
     const brand = item.brand ?? "Unknown";
@@ -100,17 +77,16 @@ export default async function AdminDashboard() {
     (a, b) => b.revenue - a.revenue
   );
 
-  // Inventory status donut
   const statusBreakdown: StatusData[] = [
-    { name: "Available",  value: stats.available,  color: "#34d399" },
-    { name: "Reserved",   value: stats.reserved,   color: "#fbbf24" },
-    { name: "Sold",       value: stats.sold,        color: "#71717a" },
-    { name: "Consigned",  value: stats.consigned,  color: "#60a5fa" },
-    { name: "In Transit", value: stats.inTransit,  color: "#a78bfa" },
+    { name: "Available", value: stats.available, color: "#34d399" },
+    { name: "Reserved", value: stats.reserved, color: "#fbbf24" },
+    { name: "Sold", value: stats.sold, color: "#71717a" },
+    { name: "Consigned", value: stats.consigned, color: "#60a5fa" },
+    { name: "In Transit", value: stats.inTransit, color: "#a78bfa" },
   ];
 
   return (
-    <div className="page-enter space-y-10">
+    <div className="page-enter space-y-8">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
@@ -132,9 +108,9 @@ export default async function AdminDashboard() {
         </div>
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {statCards.map((card) => (
+      {/* Primary stat row */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        {primaryStats.map((card) => (
           <div
             key={card.label}
             className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5"
@@ -150,71 +126,56 @@ export default async function AdminDashboard() {
         ))}
       </div>
 
-      {/* Additional stats row */}
-      <div className="grid gap-4 sm:grid-cols-4">
-        {[
+      {/* Expandable secondary stats */}
+      <AdminExpandableStats
+        stats={[
+          { label: "Reserved", value: stats.reserved },
           { label: "Consigned", value: stats.consigned },
           { label: "In Transit", value: stats.inTransit },
-          {
-            label: "Total Cost Basis",
-            value: `$${stats.totalCostBasis.toLocaleString()}`,
-          },
-          {
-            label: "Sold Revenue",
-            value: `$${stats.soldRevenue.toLocaleString()}`,
-          },
-        ].map((s) => (
-          <div
-            key={s.label}
-            className="rounded-2xl border border-zinc-800/60 bg-zinc-900/20 p-4"
-          >
-            <p className="text-[10px] uppercase tracking-[0.25em] text-zinc-600">
-              {s.label}
-            </p>
-            <p className="mt-1 text-lg font-semibold text-zinc-300">
-              {s.value}
-            </p>
-          </div>
-        ))}
-      </div>
+          { label: "Total Cost Basis", value: `$${stats.totalCostBasis.toLocaleString()}` },
+          { label: "Sold Revenue", value: `$${stats.soldRevenue.toLocaleString()}` },
+        ]}
+      />
 
-      {/* Analytics Charts */}
-      <SalesCharts monthly={monthly} brands={brands} statusBreakdown={statusBreakdown} />
+      {/* Collapsible Analytics */}
+      <AdminDashboardCharts
+        monthly={monthly}
+        brands={brands}
+        statusBreakdown={statusBreakdown}
+      />
 
-      {/* Recent Items */}
+      {/* Recent Items — 5 columns */}
       <div>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-sm font-medium uppercase tracking-[0.25em] text-zinc-500">
+          <h2 className="text-[11px] font-medium uppercase tracking-[0.25em] text-zinc-500">
             Recent Items
           </h2>
           <Link
             href="/admin/items"
-            className="text-xs text-zinc-600 transition-colors hover:text-zinc-400"
+            className="rounded-full border border-zinc-700 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.2em] text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-200"
           >
-            View all →
+            View all
           </Link>
         </div>
         <div className="overflow-hidden rounded-2xl border border-zinc-800">
           <table className="w-full text-sm">
             <thead className="border-b border-zinc-800 bg-zinc-900/50">
               <tr>
-                {["SKU", "Brand", "Name", "Size", "Status", "List Price"].map(
-                  (h) => (
-                    <th
-                      key={h}
-                      className="px-4 py-3 text-left text-[10px] font-normal uppercase tracking-[0.25em] text-zinc-500"
-                    >
-                      {h}
-                    </th>
-                  )
-                )}
+                {["SKU", "Brand", "Name", "Status", "List Price"].map((h) => (
+                  <th
+                    key={h}
+                    className="px-4 py-3 text-left text-[10px] font-normal uppercase tracking-[0.25em] text-zinc-500"
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {recentItems.length === 0 && (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={5}
                     className="px-4 py-8 text-center text-sm text-zinc-600"
                   >
                     No items yet.{" "}
@@ -240,11 +201,8 @@ export default async function AdminDashboard() {
                   <td className="px-4 py-3 text-xs text-zinc-400">
                     {item.brand}
                   </td>
-                  <td className="px-4 py-3 text-xs text-zinc-200">
+                  <td className="max-w-[200px] truncate px-4 py-3 text-xs text-zinc-200">
                     {item.name}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-zinc-400">
-                    {item.size}
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={item.status} />

@@ -6,6 +6,7 @@ const navLinks = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/items", label: "Inventory" },
   { href: "/admin/sales", label: "Sales" },
+  { href: "/admin/accounts", label: "Accounts" },
   { href: "/admin/items/new", label: "Add Item" },
   { href: "/admin/sync", label: "Sync" },
   { href: "/admin/import-export", label: "Excel" },
