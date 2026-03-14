@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { PlatformSale } from "@/lib/marketplaceModels";
 import type { Item } from "@/lib/models";
-import PlatformBadge from "@/components/PlatformBadge";
+import PlatformBadge from "@/components/marketplace/PlatformBadge";
 
 interface Props {
   sales: PlatformSale[];

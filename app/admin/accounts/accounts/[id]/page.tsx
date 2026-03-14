@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAccountById, getPlatformSales } from "@/lib/marketplaceStore";
-import PlatformBadge from "@/components/PlatformBadge";
-import SyncAccountButton from "@/components/SyncAccountButton";
+import { getAccountById, getPlatformSales } from "@/lib/services/marketplaceStore";
+import PlatformBadge from "@/components/marketplace/PlatformBadge";
+import SyncAccountButton from "@/components/marketplace/SyncAccountButton";
 
 export const dynamic = "force-dynamic";
 

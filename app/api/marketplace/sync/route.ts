@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { NextRequest } from "next/server";
-import { getAccountById, getPlatformSales, updateAccount, readMarketplaceStore, writeMarketplaceStore } from "@/lib/marketplaceStore";
-import { getEbayAccessToken, fetchEbayOrders, ebayOrderToSaleFields } from "@/lib/ebayService";
+import { getAccountById, getPlatformSales, updateAccount, readMarketplaceStore, writeMarketplaceStore } from "@/lib/services/marketplaceStore";
+import { getEbayAccessToken, fetchEbayOrders, ebayOrderToSaleFields } from "@/lib/services/ebayService";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));

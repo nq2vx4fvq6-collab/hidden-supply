@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { invalidateSheetsCache } from "@/lib/googleSheetsService";
+import { invalidateSheetsCache } from "@/lib/services/googleSheetsService";
 
 export async function refreshSheetsCacheAction() {
   invalidateSheetsCache();

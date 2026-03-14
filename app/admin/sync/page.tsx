@@ -1,5 +1,5 @@
-import { isSheetsConfigured } from "@/lib/googleSheetsService";
-import RefreshSheetsButton from "@/components/RefreshSheetsButton";
+import { isSheetsConfigured } from "@/lib/services/googleSheetsService";
+import RefreshSheetsButton from "@/components/admin/RefreshSheetsButton";
 import Link from "next/link";
 
 export default async function AdminSyncPage() {

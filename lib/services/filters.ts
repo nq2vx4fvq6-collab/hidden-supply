@@ -1,4 +1,4 @@
-import type { Item, ItemFilters } from "./models";
+import type { Item, ItemFilters } from "@/lib/models";
 
 export function applyItemFilters(items: Item[], filters: ItemFilters): Item[] {
   return items.filter((item) => {

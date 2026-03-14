@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { linkSaleToItem } from "@/lib/marketplaceStore";
+import { linkSaleToItem } from "@/lib/services/marketplaceStore";
 
 export async function PATCH(
   _req: NextRequest,

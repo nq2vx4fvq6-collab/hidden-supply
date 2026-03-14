@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getItemById } from "@/lib/inventoryService";
-import ItemFormFields from "@/components/ItemFormFields";
+import { getItemById } from "@/lib/services/inventoryService";
+import ItemFormFields from "@/components/admin/ItemFormFields";
 import { updateItemAction } from "@/app/actions/items";
 
 interface Props {

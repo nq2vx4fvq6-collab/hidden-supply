@@ -1,5 +1,5 @@
 import Link from "next/link";
-import ItemFormFields from "@/components/ItemFormFields";
+import ItemFormFields from "@/components/admin/ItemFormFields";
 import { createItemAction } from "@/app/actions/items";
 
 export default function NewItemPage() {

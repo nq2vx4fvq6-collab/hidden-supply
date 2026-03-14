@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getItemById, updateItem, deleteItem } from "@/lib/inventoryService";
+import { getItemById, updateItem, deleteItem } from "@/lib/services/inventoryService";
 
 interface Props {
   params: Promise<{ id: string }>;

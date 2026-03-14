@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { getStats, getAllItems } from "@/lib/inventoryService";
-import StatusBadge from "@/components/StatusBadge";
-import AdminDashboardCharts from "@/components/AdminDashboardCharts";
-import AdminExpandableStats from "@/components/AdminExpandableStats";
-import type { MonthlyData, BrandData, StatusData } from "@/components/SalesCharts";
+import { getStats, getAllItems } from "@/lib/services/inventoryService";
+import StatusBadge from "@/components/ui/StatusBadge";
+import AdminDashboardCharts from "@/components/admin/AdminDashboardCharts";
+import AdminExpandableStats from "@/components/admin/AdminExpandableStats";
+import type { MonthlyData, BrandData, StatusData } from "@/components/admin/SalesCharts";
 
 export const dynamic = "force-dynamic";
 

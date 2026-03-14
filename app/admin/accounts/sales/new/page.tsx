@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { getAllAccounts } from "@/lib/marketplaceStore";
-import AddSaleForm from "@/components/AddSaleForm";
+import { getAllAccounts } from "@/lib/services/marketplaceStore";
+import AddSaleForm from "@/components/marketplace/AddSaleForm";
 
 export const dynamic = "force-dynamic";
 

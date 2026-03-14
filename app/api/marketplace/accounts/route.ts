@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { createAccount } from "@/lib/marketplaceStore";
+import { createAccount } from "@/lib/services/marketplaceStore";
 import type { Platform } from "@/lib/marketplaceModels";
 
 export async function POST(req: NextRequest) {

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getAllItems, createItem, updateItem, deleteItem, getItemById } from "@/lib/inventoryService";
+import { getAllItems, createItem, updateItem, deleteItem, getItemById } from "@/lib/services/inventoryService";
 import type { InventoryStatus } from "@/lib/models";
 
 /** Delete Vercel Blob images that were removed from an item's image list. */

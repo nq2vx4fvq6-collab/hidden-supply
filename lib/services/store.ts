@@ -1,7 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { unstable_noStore as noStore } from "next/cache";
-import type { Item } from "./models";
+import type { Item } from "@/lib/models";
 
 const DATA_FILE = path.join(process.cwd(), "data", "inventory.json");
 const BLOB_PATH = "urban-supply-inventory.json";

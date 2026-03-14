@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAccountById } from "@/lib/marketplaceStore";
-import PlatformBadge from "@/components/PlatformBadge";
-import EditAccountForm from "@/components/EditAccountForm";
-import DeleteAccountButton from "@/components/DeleteAccountButton";
+import { getAccountById } from "@/lib/services/marketplaceStore";
+import PlatformBadge from "@/components/marketplace/PlatformBadge";
+import EditAccountForm from "@/components/marketplace/EditAccountForm";
+import DeleteAccountButton from "@/components/marketplace/DeleteAccountButton";
 
 export const dynamic = "force-dynamic";
 

@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { updateAccount, deleteAccount } from "@/lib/marketplaceStore";
+import { updateAccount, deleteAccount } from "@/lib/services/marketplaceStore";
 
 export async function PATCH(
   req: NextRequest,

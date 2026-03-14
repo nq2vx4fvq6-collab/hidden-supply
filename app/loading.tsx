@@ -1,4 +1,4 @@
-import Header from "@/components/Header";
+import Header from "@/components/catalog/Header";
 
 export default function Loading() {
   return (

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
-import { importItemsFromExcel } from "@/lib/excelService";
-import { createItem, updateItem, getAllItems, clearAllItems } from "@/lib/inventoryService";
+import { importItemsFromExcel } from "@/lib/services/excelService";
+import { createItem, updateItem, getAllItems, clearAllItems } from "@/lib/services/inventoryService";
 import type { InventoryStatus, Item } from "@/lib/models";
 
 export async function POST(req: NextRequest) {

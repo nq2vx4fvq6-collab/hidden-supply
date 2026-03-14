@@ -1,11 +1,11 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { getAllItems } from "@/lib/inventoryService";
+import { getAllItems } from "@/lib/services/inventoryService";
 import type { ItemFilters, InventoryStatus } from "@/lib/models";
-import Header from "@/components/Header";
-import CatalogFilters from "@/components/CatalogFilters";
-import StatusBadge from "@/components/StatusBadge";
-import StockXBadge from "@/components/StockXBadge";
+import Header from "@/components/catalog/Header";
+import CatalogFilters from "@/components/catalog/CatalogFilters";
+import StatusBadge from "@/components/ui/StatusBadge";
+import StockXBadge from "@/components/catalog/StockXBadge";
 
 interface HomeProps {
   searchParams: Promise<Record<string, string | undefined>>;

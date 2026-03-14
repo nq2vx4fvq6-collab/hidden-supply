@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { getPlatformSales, getAllAccounts } from "@/lib/marketplaceStore";
-import PlatformBadge from "@/components/PlatformBadge";
-import SalesMonitorFilters from "@/components/SalesMonitorFilters";
+import { getPlatformSales, getAllAccounts } from "@/lib/services/marketplaceStore";
+import PlatformBadge from "@/components/marketplace/PlatformBadge";
+import SalesMonitorFilters from "@/components/marketplace/SalesMonitorFilters";
 
 export const dynamic = "force-dynamic";
 

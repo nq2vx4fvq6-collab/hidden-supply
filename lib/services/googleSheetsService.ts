@@ -1,6 +1,6 @@
 import { google } from "googleapis";
-import { excelColumnsConfig } from "./excelColumnsConfig";
-import type { Item, InventoryStatus } from "./models";
+import { excelColumnsConfig } from "@/lib/config/excelColumnsConfig";
+import type { Item, InventoryStatus } from "@/lib/models";
 
 type ColKey = keyof typeof excelColumnsConfig;
 const COL_KEYS = Object.keys(excelColumnsConfig) as ColKey[];

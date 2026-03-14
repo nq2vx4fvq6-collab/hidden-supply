@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllItems, createItem } from "@/lib/inventoryService";
+import { getAllItems, createItem } from "@/lib/services/inventoryService";
 import type { ItemFilters, InventoryStatus } from "@/lib/models";
 
 export async function GET(req: NextRequest) {

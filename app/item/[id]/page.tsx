@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getItemById } from "@/lib/inventoryService";
-import Header from "@/components/Header";
-import StatusBadge from "@/components/StatusBadge";
-import ImageGallery from "@/components/ImageGallery";
+import { getItemById } from "@/lib/services/inventoryService";
+import Header from "@/components/catalog/Header";
+import StatusBadge from "@/components/ui/StatusBadge";
+import ImageGallery from "@/components/catalog/ImageGallery";
 
 interface ItemPageProps {
   params: Promise<{ id: string }>;

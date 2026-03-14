@@ -1,4 +1,4 @@
-import Header from "@/components/Header";
+import Header from "@/components/catalog/Header";
 
 // ── SOROS starburst mark (the spinning icon only, no wordmark) ───────────────
 function SorosMark({ className }: { className?: string }) {

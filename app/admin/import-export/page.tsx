@@ -1,5 +1,5 @@
-import ExcelImportForm from "@/components/ExcelImportForm";
-import { excelColumnsConfig } from "@/lib/excelColumnsConfig";
+import ExcelImportForm from "@/components/admin/ExcelImportForm";
+import { excelColumnsConfig } from "@/lib/config/excelColumnsConfig";
 
 export default function ImportExportPage() {
   const required = ["sku", "brand", "name", "category", "size", "condition", "status"];

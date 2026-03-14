@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Header from "@/components/Header";
+import Header from "@/components/catalog/Header";
 
 /** Barcode-inspired decorative SVG — reused from homepage language */
 function BarcodeAccent() {

@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { getAllAccounts } from "@/lib/marketplaceStore";
+import { getAllAccounts } from "@/lib/services/marketplaceStore";
 import type { Platform } from "@/lib/marketplaceModels";
-import PlatformBadge from "@/components/PlatformBadge";
+import PlatformBadge from "@/components/marketplace/PlatformBadge";
 
 export const dynamic = "force-dynamic";
 

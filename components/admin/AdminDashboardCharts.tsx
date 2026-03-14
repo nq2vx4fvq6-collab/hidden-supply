@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import SalesCharts from "@/components/SalesCharts";
-import type { MonthlyData, BrandData, StatusData } from "@/components/SalesCharts";
+import SalesCharts from "@/components/admin/SalesCharts";
+import type { MonthlyData, BrandData, StatusData } from "@/components/admin/SalesCharts";
 
 interface Props {
   monthly: MonthlyData[];

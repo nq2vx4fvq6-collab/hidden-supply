@@ -1,5 +1,5 @@
 import type { Item } from "@/lib/models";
-import ItemImageEditor from "@/components/ItemImageEditor";
+import ItemImageEditor from "@/components/admin/ItemImageEditor";
 
 const BRANDS = [
   "Supreme",

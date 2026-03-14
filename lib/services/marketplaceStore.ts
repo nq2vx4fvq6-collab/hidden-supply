@@ -7,7 +7,7 @@ import type {
   MarketplaceAccount,
   PlatformSale,
   Platform,
-} from "./marketplaceModels";
+} from "@/lib/marketplaceModels";
 
 const DATA_FILE = path.join(process.cwd(), "data", "marketplace.json");
 

@@ -1,13 +1,13 @@
 import { randomUUID } from "crypto";
-import { readStore, writeStore } from "./store";
-import { applyItemFilters } from "./filters";
+import { readStore, writeStore } from "@/lib/services/store";
+import { applyItemFilters } from "@/lib/services/filters";
 import {
   isSheetsConfigured,
   fetchItemsFromSheet,
   appendItemToSheet,
   updateItemInSheet,
-} from "./googleSheetsService";
-import type { Item, ItemFilters, InventoryStatus } from "./models";
+} from "@/lib/services/googleSheetsService";
+import type { Item, ItemFilters, InventoryStatus } from "@/lib/models";
 
 async function getItemsSource(): Promise<Item[]> {
   if (isSheetsConfigured()) {

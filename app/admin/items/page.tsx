@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { getAllItems } from "@/lib/inventoryService";
+import { getAllItems } from "@/lib/services/inventoryService";
 import type { InventoryStatus } from "@/lib/models";
-import DeleteButton from "@/components/DeleteButton";
-import QuickStatusSelect from "@/components/QuickStatusSelect";
-import MarkSoldButton from "@/components/MarkSoldButton";
-import AdminFilters from "@/components/AdminFilters";
+import DeleteButton from "@/components/admin/DeleteButton";
+import QuickStatusSelect from "@/components/admin/QuickStatusSelect";
+import MarkSoldButton from "@/components/admin/MarkSoldButton";
+import AdminFilters from "@/components/admin/AdminFilters";
 import { bulkUpdateStatusAction } from "@/app/actions/items";
-import PurgeImagesButton from "@/components/PurgeImagesButton";
+import PurgeImagesButton from "@/components/admin/PurgeImagesButton";
 
 const VALID_STATUSES: InventoryStatus[] = [
   "available",
