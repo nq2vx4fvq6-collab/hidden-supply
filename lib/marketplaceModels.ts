@@ -1,17 +1,20 @@
-export type Platform =
-  | "ebay"
-  | "poshmark"
-  | "stockx"
-  | "grailed"
-  | "depop";
+export type Platform = "ebay" | "poshmark" | "stockx" | "grailed" | "depop";
 
 export interface MarketplaceAccount {
   id: string;
   platform: Platform;
   displayName: string;
   externalId?: string;
-  /** Placeholder for token / encrypted credentials; server-only. */
+  /** OAuth token ref or other API credential. */
   credentialsRef?: string;
+  /** Stored login username / seller ID for manual reference. */
+  loginUsername?: string;
+  /** Stored login password (admin-gated, stored in blob). */
+  loginPassword?: string;
+  /** Extra login notes — 2FA backup codes, recovery email, etc. */
+  loginNotes?: string;
+  /** General account notes. */
+  notes?: string;
   isConnected: boolean;
   lastSyncedAt?: string;
   avatarUrl?: string;
@@ -39,7 +42,31 @@ export interface PlatformSale {
   updatedAt: string;
 }
 
+export type LogAction =
+  | "account_created"
+  | "account_updated"
+  | "credentials_updated"
+  | "sync_started"
+  | "sync_completed"
+  | "sync_failed"
+  | "sale_synced"
+  | "sale_matched"
+  | "manual_note";
+
+export type LogStatus = "success" | "info" | "warning" | "error";
+
+export interface ActivityLog {
+  id: string;
+  accountId: string;
+  action: LogAction;
+  detail?: string;
+  status: LogStatus;
+  timestamp: string;
+  metadata?: Record<string, unknown>;
+}
+
 export interface MarketplaceStore {
   accounts: MarketplaceAccount[];
   platformSales: PlatformSale[];
+  activityLogs: ActivityLog[];
 }

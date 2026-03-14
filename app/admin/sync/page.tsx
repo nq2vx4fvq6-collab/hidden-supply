@@ -1,12 +1,16 @@
 import { isSheetsConfigured } from "@/lib/services/googleSheetsService";
+import { getAllAccounts, getPlatformSales } from "@/lib/services/marketplaceStore";
 import RefreshSheetsButton from "@/components/admin/RefreshSheetsButton";
 import SharePointConnectButton from "@/components/admin/SharePointConnectButton";
 import Link from "next/link";
+
+export const dynamic = "force-dynamic";
 
 const MICROSOFT_AUTH_BASE = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize";
 
 export default async function AdminSyncPage() {
   const configured = isSheetsConfigured();
+  const [accounts, sales] = await Promise.all([getAllAccounts(), getPlatformSales()]);
 
   const clientId = process.env.SHAREPOINT_CLIENT_ID;
   const baseUrl = process.env.VERCEL_URL
@@ -27,14 +31,55 @@ export default async function AdminSyncPage() {
   const sharePointExcelUrl = process.env.SHAREPOINT_EXCEL_URL;
   const sharePointReady = Boolean(process.env.SHAREPOINT_REFRESH_TOKEN && sharePointExcelUrl);
 
+  const connectedCount = accounts.filter((a) => a.isConnected).length;
+  const unmatchedCount = sales.filter((s) => !s.matchedItemId).length;
+  const totalRevenue = sales.reduce((sum, s) => sum + (s.amount ?? 0), 0);
+
   return (
     <div className="max-w-xl space-y-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Sync & connection</h1>
         <p className="mt-1 text-sm text-zinc-500">
-          Google Sheets, SharePoint Excel, and cron sync
+          Marketplace accounts, Google Sheets, SharePoint Excel, and cron sync
         </p>
       </div>
+
+      {/* ── Marketplace accounts panel ─────────────────────────────────── */}
+      <Link
+        href="/admin/accounts"
+        className="group block rounded-2xl border border-zinc-700/60 bg-zinc-900/30 p-6 transition-all hover:border-zinc-600 hover:bg-zinc-900/50"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-zinc-100 group-hover:text-white transition-colors">
+              Marketplace Accounts
+            </p>
+            <p className="mt-0.5 text-xs text-zinc-500">
+              Manage eBay, StockX, Poshmark, Grailed &amp; Depop accounts — credentials, sales monitoring, supply cross-check
+            </p>
+          </div>
+          <span className="shrink-0 rounded-full bg-accent/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-accent">
+            Open →
+          </span>
+        </div>
+        <div className="mt-5 grid grid-cols-3 gap-3">
+          <div className="rounded-xl bg-black/30 p-3">
+            <p className="text-[10px] uppercase tracking-widest text-zinc-600">Accounts</p>
+            <p className="mt-1 text-lg font-bold text-zinc-100">{accounts.length}</p>
+            <p className="text-[10px] text-zinc-600">{connectedCount} connected</p>
+          </div>
+          <div className="rounded-xl bg-black/30 p-3">
+            <p className="text-[10px] uppercase tracking-widest text-zinc-600">Total revenue</p>
+            <p className="mt-1 text-lg font-bold text-emerald-400">${totalRevenue.toLocaleString()}</p>
+            <p className="text-[10px] text-zinc-600">{sales.length} sales logged</p>
+          </div>
+          <div className="rounded-xl bg-black/30 p-3">
+            <p className="text-[10px] uppercase tracking-widest text-zinc-600">Unmatched</p>
+            <p className="mt-1 text-lg font-bold text-amber-400">{unmatchedCount}</p>
+            <p className="text-[10px] text-zinc-600">need supply match</p>
+          </div>
+        </div>
+      </Link>
 
       <div className="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900/20 p-6">
         <div className="flex items-center justify-between">
