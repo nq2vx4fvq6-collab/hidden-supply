@@ -91,7 +91,7 @@ export default async function AccountDetailPage({
             >
               Edit
             </Link>
-            <DeleteAccountButton accountId={id} />
+            <DeleteAccountButton accountId={id} displayName={account.displayName} />
           </div>
         </div>
 

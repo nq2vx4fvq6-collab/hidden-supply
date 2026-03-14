@@ -14,6 +14,7 @@ const DATA_FILE = path.join(process.cwd(), "data", "marketplace.json");
 const defaultStore: MarketplaceStore = {
   accounts: [],
   platformSales: [],
+  activityLogs: [],
 };
 
 async function readFile(): Promise<MarketplaceStore> {
