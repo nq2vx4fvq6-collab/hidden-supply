@@ -68,15 +68,17 @@ export default async function AdminSyncPage() {
             <p className="mt-0.5 text-xs text-zinc-500">
               {sharePointReady
                 ? "Cron syncs your SharePoint Excel file every 6 hours. Same columns as manual import."
-                : "Connect once to get a refresh token, then set SHAREPOINT_EXCEL_URL and CRON_SECRET."}
+                : sharePointExcelUrl
+                  ? "Excel link is set. Cron will try to fetch it (works if file is \"Anyone with the link\") or use POST from Power Automate."
+                  : "Set SHAREPOINT_EXCEL_URL (your Excel link) and CRON_SECRET in Vercel. Optionally connect for OAuth or use POST from Power Automate."}
             </p>
           </div>
           <span
             className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-medium uppercase tracking-wider ${
-              sharePointReady ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-800 text-zinc-500"
+              sharePointReady ? "bg-emerald-500/20 text-emerald-400" : sharePointExcelUrl ? "bg-amber-500/20 text-amber-400" : "bg-zinc-800 text-zinc-500"
             }`}
           >
-            {sharePointReady ? "Active" : "Not configured"}
+            {sharePointReady ? "Active" : sharePointExcelUrl ? "Link set" : "Not configured"}
           </span>
         </div>
         <SharePointConnectButton authUrl={sharePointAuthUrl} hasConfig={hasSharePointConfig} />
@@ -85,6 +87,9 @@ export default async function AdminSyncPage() {
             Add SHAREPOINT_EXCEL_URL (your Excel sharing link) and CRON_SECRET in Vercel env.
           </p>
         )}
+        <p className="text-xs text-zinc-500">
+          Can’t sign in (e.g. school account)? Sync by sending the Excel file from Power Automate or a script — no sign-in. See docs/SHAREPOINT_SYNC.md “Option A: Sync through SharePoint”.
+        </p>
       </div>
 
       <p className="text-xs text-zinc-600">

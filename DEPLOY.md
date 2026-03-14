@@ -1,4 +1,23 @@
-# Deploy from GitHub to Vercel (auto-deploy on push)
+# Deploy to Vercel
+
+## Manual deploy (no Git connection)
+
+If Vercel is **not** connected to GitHub, deploy from your machine with the Vercel CLI:
+
+```bash
+cd urban-supply-ui-app
+vercel --prod
+```
+
+- Run from the **project root** where `vercel.json` lives (the `urban-supply-ui-app` folder).
+- Use the same Vercel account and project (**urban-supply-ui-app**) when prompted.
+- When it finishes, the production URL (e.g. `https://urban-supply-ui-app.vercel.app`) has the latest code.
+
+**Typical flow:** make changes → (optional) commit/push to GitHub → run `vercel --prod` → test the live site.
+
+---
+
+## Auto-deploy from GitHub (when Git is connected)
 
 Your local project is linked to the Vercel project **urban-supply-ui-app**. To have the **live site update automatically when you push to GitHub**, connect the GitHub repo in Vercel.
 

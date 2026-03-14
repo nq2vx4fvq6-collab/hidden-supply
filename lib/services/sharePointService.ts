@@ -70,3 +70,33 @@ export async function getExcelContentBySharingUrl(
 
   return res.arrayBuffer();
 }
+
+/**
+ * Try to fetch the file directly (no auth). Works only if the file is shared
+ * "Anyone with the link can view" and the server returns the file. Returns
+ * null if the response is not a valid Excel file.
+ */
+export async function tryDirectFetch(sharingUrl: string): Promise<ArrayBuffer | null> {
+  const res = await fetch(sharingUrl, {
+    method: "GET",
+    headers: {
+      "User-Agent": "UrbanSupplySync/1.0",
+      Accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,*/*",
+    },
+    redirect: "follow",
+  });
+
+  if (!res.ok) return null;
+
+  const contentType = (res.headers.get("content-type") || "").toLowerCase();
+  const buffer = await res.arrayBuffer();
+  // xlsx files are ZIP (PK magic bytes) or check content-type
+  const isExcel =
+    contentType.includes("spreadsheet") ||
+    contentType.includes("vnd.openxmlformats") ||
+    (buffer.byteLength >= 4 &&
+      new Uint8Array(buffer)[0] === 0x50 &&
+      new Uint8Array(buffer)[1] === 0x4b);
+
+  return isExcel ? buffer : null;
+}
