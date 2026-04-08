@@ -95,13 +95,13 @@ export default async function AdminDashboard() {
         <div className="flex gap-2">
           <Link
             href="/admin/items/new"
-            className="rounded-full bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-accent-foreground transition-all duration-200 hover:opacity-90 active:scale-[0.97]"
+            className="btn-press bg-[#86C15A] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#050608] transition-opacity duration-150 hover:opacity-85"
           >
             + Add Item
           </Link>
           <Link
             href="/admin/import-export"
-            className="rounded-full border border-zinc-700 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400 transition-colors hover:border-zinc-500 hover:text-zinc-200"
+            className="btn-press border border-white/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-zinc-400 transition-all duration-150 hover:border-white/20 hover:text-zinc-200"
           >
             Import / Export
           </Link>
@@ -109,19 +109,19 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Primary stat row */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {primaryStats.map((card) => (
           <div
             key={card.label}
-            className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5"
+            className="group border border-white/[0.06] bg-white/[0.03] p-5 transition-colors duration-200 hover:border-white/[0.1] hover:bg-white/[0.05]"
           >
-            <p className="text-[10px] uppercase tracking-[0.25em] text-zinc-500">
+            <p className="text-[9px] uppercase tracking-[0.3em] text-zinc-600">
               {card.label}
             </p>
-            <p className={`mt-1.5 text-2xl font-semibold ${card.color}`}>
+            <p className={`mt-2 text-2xl font-semibold tabular-nums ${card.color}`}>
               {card.value}
             </p>
-            <p className="mt-0.5 text-xs text-zinc-600">{card.sub}</p>
+            <p className="mt-0.5 text-[10px] text-zinc-700">{card.sub}</p>
           </div>
         ))}
       </div>
@@ -152,14 +152,14 @@ export default async function AdminDashboard() {
           </h2>
           <Link
             href="/admin/items"
-            className="rounded-full border border-zinc-700 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.2em] text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-200"
+            className="border border-white/10 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.2em] text-zinc-500 transition-all duration-150 hover:border-white/20 hover:text-zinc-300"
           >
             View all
           </Link>
         </div>
-        <div className="overflow-hidden rounded-2xl border border-zinc-800">
+        <div className="overflow-hidden border border-white/[0.06]">
           <table className="w-full text-sm">
-            <thead className="border-b border-zinc-800 bg-zinc-900/50">
+            <thead className="border-b border-white/[0.06] bg-white/[0.02]">
               <tr>
                 {["SKU", "Brand", "Name", "Status", "List Price"].map((h) => (
                   <th
@@ -193,7 +193,7 @@ export default async function AdminDashboard() {
               {recentItems.map((item, i) => (
                 <tr
                   key={item.id}
-                  className={`transition-colors hover:bg-zinc-900/40 ${i < recentItems.length - 1 ? "border-b border-zinc-900" : ""}`}
+                  className={`transition-colors duration-150 hover:bg-white/[0.03] ${i < recentItems.length - 1 ? "border-b border-white/[0.04]" : ""}`}
                 >
                   <td className="px-4 py-3 font-mono text-[11px] text-zinc-500">
                     {item.sku}

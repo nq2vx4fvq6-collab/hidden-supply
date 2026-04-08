@@ -1,6 +1,11 @@
-import { randomUUID } from "crypto";
 import { NextRequest } from "next/server";
-import { getAccountById, getPlatformSales, updateAccount, readMarketplaceStore, writeMarketplaceStore, addActivityLog } from "@/lib/services/marketplaceStore";
+import {
+  getAccountById,
+  getPlatformSales,
+  updateAccount,
+  createPlatformSale,
+  addActivityLog,
+} from "@/lib/services/marketplaceStore";
 import { getEbayAccessToken, fetchEbayOrders, ebayOrderToSaleFields } from "@/lib/services/ebayService";
 
 export async function POST(req: NextRequest) {
@@ -35,19 +40,15 @@ export async function POST(req: NextRequest) {
       const orders = await fetchEbayOrders(accessToken, fromDate);
       const existingSales = await getPlatformSales({ accountId });
       const existingIds = new Set(
-        existingSales
-          .map((s) => s.externalSaleId)
-          .filter(Boolean)
+        existingSales.map((s) => s.externalSaleId).filter(Boolean)
       );
 
       let created = 0;
-      const store = await readMarketplaceStore();
       for (const order of orders) {
         const orderId = order.orderId;
         if (!orderId || existingIds.has(orderId)) continue;
         const fields = ebayOrderToSaleFields(order);
-        store.platformSales.push({
-          id: randomUUID(),
+        await createPlatformSale({
           accountId,
           platform: "ebay",
           externalSaleId: fields.externalSaleId,
@@ -57,18 +58,20 @@ export async function POST(req: NextRequest) {
           soldAt: fields.soldAt,
           sku: fields.sku,
           rawPayload: fields.rawPayload,
-          createdAt: now,
-          updatedAt: now,
         });
         existingIds.add(orderId);
         created++;
       }
-      if (created > 0) await writeMarketplaceStore(store);
+
       await updateAccount(accountId, { lastSyncedAt: now, isConnected: true });
-      await addActivityLog(accountId, "sync_completed",
+      await addActivityLog(
+        accountId,
+        "sync_completed",
         `Sync complete — ${created} new sale${created !== 1 ? "s" : ""} imported (${orders.length} orders fetched)`,
-        "success", { ordersFetched: orders.length, newSalesCreated: created }
+        "success",
+        { ordersFetched: orders.length, newSalesCreated: created }
       );
+
       return Response.json({
         ok: true,
         platform: "ebay",
@@ -80,7 +83,9 @@ export async function POST(req: NextRequest) {
   }
 
   await updateAccount(accountId, { lastSyncedAt: now });
-  await addActivityLog(accountId, "sync_completed",
+  await addActivityLog(
+    accountId,
+    "sync_completed",
     `Sync recorded for ${account.platform} — no API integration configured`,
     "info"
   );

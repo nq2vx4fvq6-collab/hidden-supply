@@ -52,7 +52,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const hasFilters = !!(params.search || params.brand || params.category || params.size);
 
   return (
-    <div className="min-h-screen bg-[#F6F1E6] text-[#050608]">
+    <div className="min-h-screen bg-[#F6F1E6] text-[#050608] grain-overlay">
       <Header />
 
       {/* ════════════════════════════════════════
@@ -88,12 +88,14 @@ export default async function Home({ searchParams }: HomeProps) {
                     <path d="M1 5h8M6 2l3 3-3 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </Link>
-                <Link
-                  href="/community"
+                <a
+                  href="https://discord.gg/426UY8Eshk"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center gap-2.5 border border-[rgba(5,6,8,0.18)] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#050608] transition-all duration-200 hover:border-[#050608] hover:bg-[#050608] hover:text-[#F6F1E6] active:scale-[0.97]"
                 >
                   Join Discord
-                </Link>
+                </a>
               </div>
 
               <div className="mt-10">
@@ -241,8 +243,8 @@ export default async function Home({ searchParams }: HomeProps) {
                 <Link
                   key={item.id}
                   href={`/item/${item.id}`}
-                  className="stagger-item group flex flex-col bg-[#F6F1E6] transition-colors duration-200 hover:bg-[#EDE8DC]"
-                  style={{ ["--delay" as string]: `${i * 25}ms` }}
+                  className="stagger-item catalog-card group flex flex-col bg-[#F6F1E6] transition-colors duration-300 hover:bg-[#EDE8DC]"
+                  style={{ ["--delay" as string]: `${Math.min(i * 20, 400)}ms` }}
                 >
                   {/* Label header */}
                   <div className="flex items-center justify-between border-b border-[rgba(5,6,8,0.07)] px-3 py-1.5">
@@ -259,13 +261,15 @@ export default async function Home({ searchParams }: HomeProps) {
                       <img
                         src={item.images[0]}
                         alt={item.name}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                        className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                       />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <p className="text-[8px] uppercase tracking-[0.4em] text-[#C4C4C4]">No Image</p>
                       </div>
                     )}
+                    {/* Hover overlay — subtle vignette */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[rgba(5,6,8,0.18)] to-transparent opacity-0 transition-opacity duration-400 group-hover:opacity-100" />
                     <StockXBadge
                       brand={item.brand}
                       name={item.name}
@@ -274,9 +278,9 @@ export default async function Home({ searchParams }: HomeProps) {
                     />
                   </div>
 
-                  {/* Inventory label metadata */}
+                  {/* Metadata */}
                   <div className="flex flex-col gap-1 px-3 py-3">
-                    <p className="text-[8px] uppercase tracking-[0.2em] text-[#7A7A7A] md:text-[9px]">
+                    <p className="text-[8px] uppercase tracking-[0.2em] text-[#7A7A7A] transition-colors duration-200 group-hover:text-[#050608] md:text-[9px]">
                       {item.brand}
                     </p>
                     <p className="line-clamp-2 text-[10px] font-semibold leading-snug text-[#050608] md:text-xs">

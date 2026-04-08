@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-/** Inline barcode mark — lightweight CSS bars matching brand logo language */
 function BarcodeMark({ className = "" }: { className?: string }) {
   return (
     <div className={`flex items-stretch gap-[2px] ${className}`}>
@@ -14,7 +13,6 @@ function BarcodeMark({ className = "" }: { className?: string }) {
       <div className="w-[2px] bg-current opacity-30" />
       <div className="w-[3px] bg-current" />
       <div className="w-[2px] bg-current opacity-20" />
-      {/* Access Green accent bar */}
       <div className="w-[3px] bg-[#86C15A]" />
       <div className="w-[2px] bg-current opacity-20" />
       <div className="w-[3px] bg-current" />
@@ -30,7 +28,7 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -39,20 +37,19 @@ export default function Header() {
   return (
     <header
       className={[
-        "sticky top-0 z-50",
-        "bg-[#F6F1E6] transition-shadow duration-300",
+        "sticky top-0 z-50 transition-all duration-300",
         scrolled
-          ? "shadow-[0_1px_0_0_rgba(5,6,8,0.1)]"
-          : "border-b border-[rgba(5,6,8,0.08)]",
+          ? "bg-[rgba(246,241,230,0.88)] backdrop-blur-md shadow-[0_1px_0_0_rgba(5,6,8,0.08)]"
+          : "bg-[#F6F1E6] border-b border-[rgba(5,6,8,0.08)]",
       ].join(" ")}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
 
-        {/* ── Logo ── */}
+        {/* Logo */}
         <Link href="/" className="group flex items-center gap-3">
-          <BarcodeMark className="h-5 text-[#050608] transition-opacity duration-200 group-hover:opacity-60" />
+          <BarcodeMark className="h-5 text-[#050608] transition-opacity duration-200 group-hover:opacity-50" />
           <div className="leading-none">
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#050608] transition-opacity duration-200 group-hover:opacity-60">
+            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#050608] transition-opacity duration-200 group-hover:opacity-50">
               Hidden Supply
             </p>
             <p className="mt-0.5 text-[8px] uppercase tracking-[0.22em] text-[#7A7A7A]">
@@ -61,7 +58,7 @@ export default function Header() {
           </div>
         </Link>
 
-        {/* ── Desktop Nav ── */}
+        {/* Desktop Nav */}
         <nav className="hidden items-center gap-7 sm:flex">
           {[
             { label: "Inventory", href: "/#inventory" },
@@ -70,33 +67,32 @@ export default function Header() {
             <Link
               key={label}
               href={href}
-              className="group relative text-[10px] uppercase tracking-[0.22em] text-[#7A7A7A] transition-colors duration-150 hover:text-[#050608]"
+              className="group relative text-[10px] uppercase tracking-[0.22em] text-[#7A7A7A] transition-colors duration-200 hover:text-[#050608]"
             >
               {label}
-              <span className="absolute -bottom-px left-0 h-px w-0 bg-[#050608] transition-[width] duration-300 group-hover:w-full" />
+              <span className="absolute -bottom-px left-0 h-px w-0 bg-[#86C15A] transition-[width] duration-300 ease-out group-hover:w-full" />
             </Link>
           ))}
         </nav>
 
-        {/* ── Right actions ── */}
+        {/* Right actions */}
         <div className="flex items-center gap-3">
-          {/* Login — subtle text link */}
           <Link
             href="/admin/login"
-            className="hidden text-[10px] uppercase tracking-[0.22em] text-[#7A7A7A] transition-colors hover:text-[#050608] sm:block"
+            className="hidden text-[10px] uppercase tracking-[0.22em] text-[#7A7A7A] transition-colors duration-200 hover:text-[#050608] sm:block"
           >
             Login
           </Link>
 
-          {/* Join Network CTA */}
-          <Link
-            href="/community"
-            className="flex items-center gap-2 bg-[#050608] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#F6F1E6] transition-all duration-200 hover:bg-[#86C15A] hover:text-[#050608] active:scale-[0.97]"
+          <a
+            href="https://discord.gg/426UY8Eshk"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-press flex items-center gap-2 bg-[#050608] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#F6F1E6] transition-colors duration-200 hover:bg-[#86C15A] hover:text-[#050608]"
           >
             Join Network
-          </Link>
+          </a>
 
-          {/* Admin icon — discreet */}
           <Link
             href="/admin"
             title="Admin"
@@ -107,42 +103,44 @@ export default function Header() {
             </svg>
           </Link>
 
-          {/* Mobile menu toggle */}
+          {/* Mobile toggle */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="flex h-7 w-7 items-center justify-center text-[#050608] sm:hidden"
-            aria-label="Menu"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
             <div className="flex flex-col gap-[5px]">
-              <span className={`block h-px w-5 bg-current transition-transform duration-200 ${mobileOpen ? "translate-y-[6px] rotate-45" : ""}`} />
-              <span className={`block h-px w-5 bg-current transition-opacity duration-200 ${mobileOpen ? "opacity-0" : ""}`} />
-              <span className={`block h-px w-5 bg-current transition-transform duration-200 ${mobileOpen ? "-translate-y-[6px] -rotate-45" : ""}`} />
+              <span className={`block h-px w-5 bg-current transition-all duration-200 ${mobileOpen ? "translate-y-[6px] rotate-45" : ""}`} />
+              <span className={`block h-px w-5 bg-current transition-all duration-200 ${mobileOpen ? "opacity-0 scale-x-0" : ""}`} />
+              <span className={`block h-px w-5 bg-current transition-all duration-200 ${mobileOpen ? "-translate-y-[6px] -rotate-45" : ""}`} />
             </div>
           </button>
         </div>
       </div>
 
       {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="border-t border-[rgba(5,6,8,0.08)] bg-[#F6F1E6] px-6 py-4 sm:hidden">
-          <nav className="flex flex-col gap-4">
-            {[
-              { label: "Inventory", href: "/#inventory"  },
-              { label: "Community", href: "/community"   },
-              { label: "Login",     href: "/admin/login" },
-            ].map(({ label, href }) => (
-              <Link
-                key={label}
-                href={href}
-                onClick={() => setMobileOpen(false)}
-                className="text-[11px] uppercase tracking-[0.25em] text-[#7A7A7A] hover:text-[#050608]"
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      )}
+      <div
+        className={`overflow-hidden border-t border-[rgba(5,6,8,0.08)] bg-[#F6F1E6] transition-all duration-300 sm:hidden ${
+          mobileOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <nav className="flex flex-col gap-4 px-6 py-5">
+          {[
+            { label: "Inventory", href: "/#inventory"  },
+            { label: "Community", href: "/community"   },
+            { label: "Login",     href: "/admin/login" },
+          ].map(({ label, href }) => (
+            <Link
+              key={label}
+              href={href}
+              onClick={() => setMobileOpen(false)}
+              className="text-[11px] uppercase tracking-[0.25em] text-[#7A7A7A] transition-colors duration-150 hover:text-[#050608]"
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+      </div>
     </header>
   );
 }

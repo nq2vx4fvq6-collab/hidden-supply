@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
-import { readStore, writeStore } from "@/lib/services/store";
+import { unstable_noStore as noStore } from "next/cache";
+import { supabase } from "@/lib/supabase";
 import { applyItemFilters } from "@/lib/services/filters";
 import {
   isSheetsConfigured,
@@ -9,17 +10,81 @@ import {
 } from "@/lib/services/googleSheetsService";
 import type { Item, ItemFilters, InventoryStatus } from "@/lib/models";
 
+// ─── Row ↔ Item mappers ───────────────────────────────────────────────────────
+
+function rowToItem(row: Record<string, unknown>): Item {
+  return {
+    id: row.id as string,
+    sku: row.sku as string,
+    brand: row.brand as string,
+    name: row.name as string,
+    category: row.category as string,
+    size: row.size as string,
+    condition: row.condition as string,
+    colorway: (row.colorway as string | null) ?? undefined,
+    cost: (row.cost as number | null) ?? undefined,
+    listPrice: (row.list_price as number | null) ?? undefined,
+    salePrice: (row.sale_price as number | null) ?? undefined,
+    status: row.status as Item["status"],
+    images: (row.images as string[]) ?? [],
+    acquisitionDate: (row.acquisition_date as string | null) ?? undefined,
+    soldDate: (row.sold_date as string | null) ?? undefined,
+    soldTo: (row.sold_to as string | null) ?? undefined,
+    notes: (row.notes as string | null) ?? undefined,
+    listedOnPlatforms: (row.listed_on_platforms as Item["listedOnPlatforms"]) ?? undefined,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  };
+}
+
+function itemToRow(item: Partial<Item> & { id: string }) {
+  const row: Record<string, unknown> = { id: item.id };
+  if (item.sku !== undefined)              row.sku = item.sku;
+  if (item.brand !== undefined)            row.brand = item.brand;
+  if (item.name !== undefined)             row.name = item.name;
+  if (item.category !== undefined)         row.category = item.category;
+  if (item.size !== undefined)             row.size = item.size;
+  if (item.condition !== undefined)        row.condition = item.condition;
+  if ("colorway" in item)                  row.colorway = item.colorway ?? null;
+  if ("cost" in item)                      row.cost = item.cost ?? null;
+  if ("listPrice" in item)                 row.list_price = item.listPrice ?? null;
+  if ("salePrice" in item)                 row.sale_price = item.salePrice ?? null;
+  if (item.status !== undefined)           row.status = item.status;
+  if (item.images !== undefined)           row.images = item.images;
+  if ("acquisitionDate" in item)           row.acquisition_date = item.acquisitionDate ?? null;
+  if ("soldDate" in item)                  row.sold_date = item.soldDate ?? null;
+  if ("soldTo" in item)                    row.sold_to = item.soldTo ?? null;
+  if ("notes" in item)                     row.notes = item.notes ?? null;
+  if ("listedOnPlatforms" in item)         row.listed_on_platforms = item.listedOnPlatforms ?? null;
+  if (item.createdAt !== undefined)        row.created_at = item.createdAt;
+  if (item.updatedAt !== undefined)        row.updated_at = item.updatedAt;
+  return row;
+}
+
+// ─── Read source (Sheets → Supabase) ─────────────────────────────────────────
+
 async function getItemsSource(): Promise<Item[]> {
   if (isSheetsConfigured()) {
     try {
       return await fetchItemsFromSheet();
     } catch {
-      return (await readStore()).items;
+      // fall through to Supabase
     }
   }
-  const { items } = await readStore();
-  return items;
+  noStore();
+  const { data, error } = await supabase
+    .from("items")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("[inventoryService] read failed:", error.message);
+    return [];
+  }
+  return (data ?? []).map(rowToItem);
 }
+
+// ─── Public API ───────────────────────────────────────────────────────────────
 
 export async function getAllItems(filters?: ItemFilters): Promise<Item[]> {
   const items = await getItemsSource();
@@ -30,18 +95,29 @@ export async function getAllItems(filters?: ItemFilters): Promise<Item[]> {
 }
 
 export async function getItemById(id: string): Promise<Item | undefined> {
-  const items = await getItemsSource();
-  return items.find((i) => i.id === id);
+  noStore();
+  const { data, error } = await supabase
+    .from("items")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) return undefined;
+  return rowToItem(data);
 }
 
 export async function createItem(
   data: Omit<Item, "id" | "createdAt" | "updatedAt">
 ): Promise<Item> {
-  const store = await readStore();
   const now = new Date().toISOString();
   const item: Item = { ...data, id: randomUUID(), createdAt: now, updatedAt: now };
-  store.items.push(item);
-  await writeStore(store);
+
+  const { error } = await supabase.from("items").insert(itemToRow(item));
+  if (error) {
+    console.error("[inventoryService] createItem failed:", error.message);
+    throw error;
+  }
+
   if (isSheetsConfigured()) {
     try {
       await appendItemToSheet(item);
@@ -56,16 +132,22 @@ export async function updateItem(
   id: string,
   data: Partial<Omit<Item, "id" | "createdAt">>
 ): Promise<Item | null> {
-  const store = await readStore();
-  const idx = store.items.findIndex((i) => i.id === id);
-  if (idx === -1) return null;
-  store.items[idx] = {
-    ...store.items[idx],
-    ...data,
-    id,
-    updatedAt: new Date().toISOString(),
-  };
-  await writeStore(store);
+  const now = new Date().toISOString();
+  const row = itemToRow({ ...data, id, updatedAt: now });
+  delete row.id; // don't pass id in the update payload
+
+  const { data: updated, error } = await supabase
+    .from("items")
+    .update(row)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error || !updated) {
+    console.error("[inventoryService] updateItem failed:", error?.message);
+    return null;
+  }
+
   if (isSheetsConfigured()) {
     try {
       await updateItemInSheet(id, data);
@@ -73,20 +155,28 @@ export async function updateItem(
       console.error("[inventoryService] update in sheet failed:", err);
     }
   }
-  return store.items[idx];
+  return rowToItem(updated);
 }
 
 export async function deleteItem(id: string): Promise<boolean> {
-  const store = await readStore();
-  const originalLen = store.items.length;
-  store.items = store.items.filter((i) => i.id !== id);
-  if (store.items.length === originalLen) return false;
-  await writeStore(store);
-  return true;
+  const { error, count } = await supabase
+    .from("items")
+    .delete({ count: "exact" })
+    .eq("id", id);
+
+  if (error) {
+    console.error("[inventoryService] deleteItem failed:", error.message);
+    return false;
+  }
+  return (count ?? 0) > 0;
 }
 
 export async function clearAllItems(): Promise<void> {
-  await writeStore({ items: [] });
+  const { error } = await supabase.from("items").delete().neq("id", "");
+  if (error) {
+    console.error("[inventoryService] clearAllItems failed:", error.message);
+    throw error;
+  }
 }
 
 export async function getStats() {
