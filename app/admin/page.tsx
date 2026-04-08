@@ -89,19 +89,19 @@ export default async function AdminDashboard() {
     <div className="page-enter space-y-8">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="mt-1 text-sm text-zinc-500">Urban Supply — business overview</p>
+          <h1 className="text-xl font-semibold tracking-tight md:text-2xl">Dashboard</h1>
+          <p className="mt-0.5 text-sm text-zinc-500">Business overview</p>
         </div>
         <div className="flex gap-2">
           <Link
             href="/admin/items/new"
-            className="btn-press bg-[#86C15A] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#050608] transition-opacity duration-150 hover:opacity-85"
+            className="btn-press bg-[#86C15A] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#050608] transition-opacity duration-150 hover:opacity-85 md:px-4"
           >
-            + Add Item
+            + Add
           </Link>
           <Link
             href="/admin/import-export"
-            className="btn-press border border-white/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-zinc-400 transition-all duration-150 hover:border-white/20 hover:text-zinc-200"
+            className="btn-press hidden border border-white/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-zinc-400 transition-all duration-150 hover:border-white/20 hover:text-zinc-200 md:block"
           >
             Import / Export
           </Link>
@@ -144,7 +144,7 @@ export default async function AdminDashboard() {
         statusBreakdown={statusBreakdown}
       />
 
-      {/* Recent Items — 5 columns */}
+      {/* Recent Items */}
       <div>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[11px] font-medium uppercase tracking-[0.25em] text-zinc-500">
@@ -157,66 +157,77 @@ export default async function AdminDashboard() {
             View all
           </Link>
         </div>
-        <div className="overflow-hidden border border-white/[0.06]">
-          <table className="w-full text-sm">
-            <thead className="border-b border-white/[0.06] bg-white/[0.02]">
-              <tr>
-                {["SKU", "Brand", "Name", "Status", "List Price"].map((h) => (
-                  <th
-                    key={h}
-                    className="px-4 py-3 text-left text-[10px] font-normal uppercase tracking-[0.25em] text-zinc-500"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {recentItems.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-4 py-8 text-center text-sm text-zinc-600"
-                  >
-                    No items yet.{" "}
-                    <Link href="/admin/items/new" className="underline">
-                      Add one
-                    </Link>{" "}
-                    or{" "}
-                    <Link href="/admin/import-export" className="underline">
-                      import from Excel
-                    </Link>
-                    .
-                  </td>
-                </tr>
-              )}
-              {recentItems.map((item, i) => (
-                <tr
+
+        {recentItems.length === 0 ? (
+          <div className="border border-white/[0.06] px-4 py-8 text-center text-sm text-zinc-600">
+            No items yet.{" "}
+            <Link href="/admin/items/new" className="underline">Add one</Link>{" "}
+            or{" "}
+            <Link href="/admin/import-export" className="underline">import from Excel</Link>.
+          </div>
+        ) : (
+          <>
+            {/* Mobile cards */}
+            <div className="space-y-2 md:hidden">
+              {recentItems.map((item) => (
+                <Link
                   key={item.id}
-                  className={`transition-colors duration-150 hover:bg-white/[0.03] ${i < recentItems.length - 1 ? "border-b border-white/[0.04]" : ""}`}
+                  href={`/admin/items/${item.id}/edit`}
+                  className="flex items-center justify-between border border-white/[0.06] bg-white/[0.02] px-4 py-3 transition-colors active:bg-white/[0.04]"
                 >
-                  <td className="px-4 py-3 font-mono text-[11px] text-zinc-500">
-                    {item.sku}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-zinc-400">
-                    {item.brand}
-                  </td>
-                  <td className="max-w-[200px] truncate px-4 py-3 text-xs text-zinc-200">
-                    {item.name}
-                  </td>
-                  <td className="px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-zinc-100">{item.name}</p>
+                    <p className="mt-0.5 text-[11px] text-zinc-500">
+                      {item.brand}
+                      <span className="mx-1.5 text-zinc-700">·</span>
+                      <span className="font-mono text-zinc-600">{item.sku}</span>
+                    </p>
+                  </div>
+                  <div className="ml-4 flex flex-shrink-0 flex-col items-end gap-1">
                     <StatusBadge status={item.status} />
-                  </td>
-                  <td className="px-4 py-3 text-xs text-zinc-200">
-                    {item.listPrice
-                      ? `$${item.listPrice.toLocaleString()}`
-                      : "—"}
-                  </td>
-                </tr>
+                    {item.listPrice && (
+                      <p className="text-xs text-zinc-400">${item.listPrice.toLocaleString()}</p>
+                    )}
+                  </div>
+                </Link>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden overflow-hidden border border-white/[0.06] md:block">
+              <table className="w-full text-sm">
+                <thead className="border-b border-white/[0.06] bg-white/[0.02]">
+                  <tr>
+                    {["SKU", "Brand", "Name", "Status", "List Price"].map((h) => (
+                      <th
+                        key={h}
+                        className="px-4 py-3 text-left text-[10px] font-normal uppercase tracking-[0.25em] text-zinc-500"
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentItems.map((item, i) => (
+                    <tr
+                      key={item.id}
+                      className={`transition-colors duration-150 hover:bg-white/[0.03] ${i < recentItems.length - 1 ? "border-b border-white/[0.04]" : ""}`}
+                    >
+                      <td className="px-4 py-3 font-mono text-[11px] text-zinc-500">{item.sku}</td>
+                      <td className="px-4 py-3 text-xs text-zinc-400">{item.brand}</td>
+                      <td className="max-w-[200px] truncate px-4 py-3 text-xs text-zinc-200">{item.name}</td>
+                      <td className="px-4 py-3"><StatusBadge status={item.status} /></td>
+                      <td className="px-4 py-3 text-xs text-zinc-200">
+                        {item.listPrice ? `$${item.listPrice.toLocaleString()}` : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
