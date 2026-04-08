@@ -16,7 +16,7 @@ export default async function ItemPage({ params }: ItemPageProps) {
   if (!item) notFound();
 
   return (
-    <div className="min-h-screen bg-[#F6F1E6] text-[#050608]">
+    <div className="min-h-screen bg-[#F6F1E6] text-[#050608] grain-overlay">
       <Header />
 
       <main className="page-enter mx-auto max-w-7xl px-6 py-10 md:py-14">
@@ -111,7 +111,7 @@ export default async function ItemPage({ params }: ItemPageProps) {
                   href="https://www.instagram.com/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-1 items-center justify-center gap-2 bg-[#050608] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#F6F1E6] transition-all duration-200 hover:bg-[#86C15A] hover:text-[#050608] active:scale-[0.98]"
+                  className="btn-press flex flex-1 items-center justify-center gap-2 bg-[#050608] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#F6F1E6] transition-colors duration-200 hover:bg-[#86C15A] hover:text-[#050608]"
                 >
                   Instagram DM
                 </a>
@@ -119,7 +119,7 @@ export default async function ItemPage({ params }: ItemPageProps) {
                   href="https://wa.me/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-1 items-center justify-center gap-2 border border-[rgba(5,6,8,0.18)] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#050608] transition-all duration-200 hover:bg-[#050608] hover:text-[#F6F1E6] active:scale-[0.98]"
+                  className="btn-press flex flex-1 items-center justify-center gap-2 border border-[rgba(5,6,8,0.18)] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#050608] transition-all duration-200 hover:border-[#050608] hover:bg-[#050608] hover:text-[#F6F1E6]"
                 >
                   WhatsApp
                 </a>

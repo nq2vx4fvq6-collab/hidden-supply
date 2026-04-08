@@ -1,9 +1,7 @@
-import { promises as fs } from "fs";
-import path from "path";
 import { randomUUID } from "crypto";
 import { unstable_noStore as noStore } from "next/cache";
+import { supabase } from "@/lib/supabase";
 import type {
-  MarketplaceStore,
   MarketplaceAccount,
   PlatformSale,
   ActivityLog,
@@ -12,117 +10,148 @@ import type {
   Platform,
 } from "@/lib/marketplaceModels";
 
-const DATA_FILE = path.join(process.cwd(), "data", "marketplace.json");
-const BLOB_PATH = "urban-supply-marketplace.json";
+type Row = Record<string, unknown>;
 
-const defaultStore: MarketplaceStore = {
-  accounts: [],
-  platformSales: [],
-  activityLogs: [],
-};
+// ─── Row → Model mappers ──────────────────────────────────────────────────────
 
-// ─── Vercel Blob (preferred production store) ─────────────────────────────────
-
-const isBlobEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
-
-async function readBlob(): Promise<MarketplaceStore> {
-  noStore();
-  try {
-    const { list } = await import("@vercel/blob");
-    const { blobs } = await list({ prefix: BLOB_PATH });
-    if (!blobs.length) return readFile();
-    const res = await fetch(blobs[0].url, { cache: "no-store" });
-    if (!res.ok) return readFile();
-    const data = (await res.json()) as MarketplaceStore;
-    // Back-fill missing activityLogs array for older stored data
-    return { ...defaultStore, ...data };
-  } catch (err) {
-    console.warn("[marketplaceStore] Blob read failed, falling back to file:", err);
-    return readFile();
-  }
+function rowToAccount(row: Row): MarketplaceAccount {
+  return {
+    id: row.id as string,
+    platform: row.platform as MarketplaceAccount["platform"],
+    displayName: row.display_name as string,
+    externalId: (row.external_id as string | null) ?? undefined,
+    credentialsRef: (row.credentials_ref as string | null) ?? undefined,
+    loginUsername: (row.login_username as string | null) ?? undefined,
+    loginPassword: (row.login_password as string | null) ?? undefined,
+    loginNotes: (row.login_notes as string | null) ?? undefined,
+    notes: (row.notes as string | null) ?? undefined,
+    isConnected: row.is_connected as boolean,
+    lastSyncedAt: (row.last_synced_at as string | null) ?? undefined,
+    avatarUrl: (row.avatar_url as string | null) ?? undefined,
+    email: (row.email as string | null) ?? undefined,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  };
 }
 
-async function writeBlob(store: MarketplaceStore): Promise<void> {
-  try {
-    const { put } = await import("@vercel/blob");
-    await put(BLOB_PATH, JSON.stringify(store, null, 2), {
-      access: "public",
-      addRandomSuffix: false,
-      allowOverwrite: true,
-    });
-  } catch (err) {
-    console.error("[marketplaceStore] Blob write failed:", err);
-    throw err;
-  }
+function rowToSale(row: Row): PlatformSale {
+  return {
+    id: row.id as string,
+    accountId: row.account_id as string,
+    platform: row.platform as PlatformSale["platform"],
+    externalSaleId: (row.external_sale_id as string | null) ?? undefined,
+    title: row.title as string,
+    sku: (row.sku as string | null) ?? undefined,
+    brand: (row.brand as string | null) ?? undefined,
+    size: (row.size as string | null) ?? undefined,
+    amount: row.amount as number,
+    currency: row.currency as string,
+    soldAt: row.sold_at as string,
+    rawPayload: (row.raw_payload as Record<string, unknown> | null) ?? undefined,
+    matchedItemId: (row.matched_item_id as string | null) ?? undefined,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  };
 }
 
-// ─── JSON file (local dev fallback) ──────────────────────────────────────────
-
-async function readFile(): Promise<MarketplaceStore> {
-  try {
-    const raw = await fs.readFile(DATA_FILE, "utf-8");
-    const data = JSON.parse(raw) as MarketplaceStore;
-    return { ...defaultStore, ...data };
-  } catch {
-    return { ...defaultStore };
-  }
-}
-
-async function writeFile(store: MarketplaceStore): Promise<void> {
-  try {
-    await fs.mkdir(path.dirname(DATA_FILE), { recursive: true });
-    await fs.writeFile(DATA_FILE, JSON.stringify(store, null, 2), "utf-8");
-  } catch (err) {
-    console.warn("[marketplaceStore] file write failed (read-only filesystem):", err);
-  }
-}
-
-// ─── Public store API ─────────────────────────────────────────────────────────
-
-export async function readMarketplaceStore(): Promise<MarketplaceStore> {
-  if (isBlobEnabled) return readBlob();
-  return readFile();
-}
-
-export async function writeMarketplaceStore(store: MarketplaceStore): Promise<void> {
-  if (isBlobEnabled) return writeBlob(store);
-  return writeFile(store);
+function rowToLog(row: Row): ActivityLog {
+  return {
+    id: row.id as string,
+    accountId: row.account_id as string,
+    action: row.action as ActivityLog["action"],
+    detail: (row.detail as string | null) ?? undefined,
+    status: row.status as ActivityLog["status"],
+    timestamp: row.timestamp as string,
+    metadata: (row.metadata as Record<string, unknown> | null) ?? undefined,
+  };
 }
 
 // ─── Accounts ────────────────────────────────────────────────────────────────
 
 export async function getAllAccounts(): Promise<MarketplaceAccount[]> {
-  const store = await readMarketplaceStore();
-  return store.accounts;
+  noStore();
+  const { data, error } = await supabase
+    .from("marketplace_accounts")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("[marketplaceStore] getAllAccounts failed:", error.message);
+    return [];
+  }
+  return (data ?? []).map(rowToAccount);
 }
 
 export async function getAccountById(id: string): Promise<MarketplaceAccount | null> {
-  const store = await readMarketplaceStore();
-  return store.accounts.find((a) => a.id === id) ?? null;
+  noStore();
+  const { data, error } = await supabase
+    .from("marketplace_accounts")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) return null;
+  return rowToAccount(data);
 }
 
 export async function getAccountsByPlatform(platform: Platform): Promise<MarketplaceAccount[]> {
-  const store = await readMarketplaceStore();
-  return store.accounts.filter((a) => a.platform === platform);
+  noStore();
+  const { data, error } = await supabase
+    .from("marketplace_accounts")
+    .select("*")
+    .eq("platform", platform)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("[marketplaceStore] getAccountsByPlatform failed:", error.message);
+    return [];
+  }
+  return (data ?? []).map(rowToAccount);
 }
 
 export async function createAccount(
   data: Omit<MarketplaceAccount, "id" | "createdAt" | "updatedAt">
 ): Promise<MarketplaceAccount> {
-  const store = await readMarketplaceStore();
   const now = new Date().toISOString();
-  const account: MarketplaceAccount = { ...data, id: randomUUID(), createdAt: now, updatedAt: now };
-  store.accounts.push(account);
-  // Auto-log creation
-  store.activityLogs.push({
+  const row = {
     id: randomUUID(),
-    accountId: account.id,
-    action: "account_created",
-    detail: `Account "${account.displayName}" created on ${account.platform}`,
-    status: "success",
-    timestamp: now,
-  });
-  await writeMarketplaceStore(store);
+    platform: data.platform,
+    display_name: data.displayName,
+    external_id: data.externalId ?? null,
+    credentials_ref: data.credentialsRef ?? null,
+    login_username: data.loginUsername ?? null,
+    login_password: data.loginPassword ?? null,
+    login_notes: data.loginNotes ?? null,
+    notes: data.notes ?? null,
+    is_connected: data.isConnected,
+    last_synced_at: data.lastSyncedAt ?? null,
+    avatar_url: data.avatarUrl ?? null,
+    email: data.email ?? null,
+    created_at: now,
+    updated_at: now,
+  };
+
+  const { data: inserted, error } = await supabase
+    .from("marketplace_accounts")
+    .insert(row)
+    .select()
+    .single();
+
+  if (error || !inserted) {
+    console.error("[marketplaceStore] createAccount failed:", error?.message);
+    throw error;
+  }
+
+  const account = rowToAccount(inserted);
+
+  // Auto-log creation
+  await addActivityLog(
+    account.id,
+    "account_created",
+    `Account "${account.displayName}" created on ${account.platform}`,
+    "success"
+  );
+
   return account;
 }
 
@@ -130,24 +159,48 @@ export async function updateAccount(
   id: string,
   data: Partial<Omit<MarketplaceAccount, "id" | "createdAt">>
 ): Promise<MarketplaceAccount | null> {
-  const store = await readMarketplaceStore();
-  const idx = store.accounts.findIndex((a) => a.id === id);
-  if (idx === -1) return null;
-  store.accounts[idx] = { ...store.accounts[idx], ...data, id, updatedAt: new Date().toISOString() };
-  await writeMarketplaceStore(store);
-  return store.accounts[idx];
+  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (data.platform !== undefined)       patch.platform = data.platform;
+  if (data.displayName !== undefined)    patch.display_name = data.displayName;
+  if ("externalId" in data)              patch.external_id = data.externalId ?? null;
+  if ("credentialsRef" in data)          patch.credentials_ref = data.credentialsRef ?? null;
+  if ("loginUsername" in data)           patch.login_username = data.loginUsername ?? null;
+  if ("loginPassword" in data)           patch.login_password = data.loginPassword ?? null;
+  if ("loginNotes" in data)              patch.login_notes = data.loginNotes ?? null;
+  if ("notes" in data)                   patch.notes = data.notes ?? null;
+  if (data.isConnected !== undefined)    patch.is_connected = data.isConnected;
+  if ("lastSyncedAt" in data)            patch.last_synced_at = data.lastSyncedAt ?? null;
+  if ("avatarUrl" in data)               patch.avatar_url = data.avatarUrl ?? null;
+  if ("email" in data)                   patch.email = data.email ?? null;
+
+  const { data: updated, error } = await supabase
+    .from("marketplace_accounts")
+    .update(patch)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error || !updated) {
+    console.error("[marketplaceStore] updateAccount failed:", error?.message);
+    return null;
+  }
+  return rowToAccount(updated);
 }
 
 export async function deleteAccount(id: string): Promise<boolean> {
-  const store = await readMarketplaceStore();
-  const originalLen = store.accounts.length;
-  store.accounts = store.accounts.filter((a) => a.id !== id);
-  if (store.accounts.length === originalLen) return false;
-  await writeMarketplaceStore(store);
-  return true;
+  const { error, count } = await supabase
+    .from("marketplace_accounts")
+    .delete({ count: "exact" })
+    .eq("id", id);
+
+  if (error) {
+    console.error("[marketplaceStore] deleteAccount failed:", error.message);
+    return false;
+  }
+  return (count ?? 0) > 0;
 }
 
-// ─── Platform sales ──────────────────────────────────────────────────────────
+// ─── Platform sales ───────────────────────────────────────────────────────────
 
 export interface PlatformSaleFilters {
   platform?: Platform;
@@ -158,43 +211,102 @@ export interface PlatformSaleFilters {
 }
 
 export async function getPlatformSales(filters?: PlatformSaleFilters): Promise<PlatformSale[]> {
-  const store = await readMarketplaceStore();
-  let list = [...store.platformSales];
-  if (filters?.platform) list = list.filter((s) => s.platform === filters.platform);
-  if (filters?.accountId) list = list.filter((s) => s.accountId === filters.accountId);
-  if (filters?.matched === true) list = list.filter((s) => s.matchedItemId != null && s.matchedItemId !== "");
-  if (filters?.matched === false) list = list.filter((s) => !s.matchedItemId || s.matchedItemId === "");
-  if (filters?.fromDate) list = list.filter((s) => s.soldAt >= filters.fromDate!);
-  if (filters?.toDate) list = list.filter((s) => s.soldAt <= filters.toDate!);
-  return list.sort((a, b) => new Date(b.soldAt).getTime() - new Date(a.soldAt).getTime());
+  noStore();
+  let query = supabase
+    .from("platform_sales")
+    .select("*")
+    .order("sold_at", { ascending: false });
+
+  if (filters?.platform)              query = query.eq("platform", filters.platform);
+  if (filters?.accountId)             query = query.eq("account_id", filters.accountId);
+  if (filters?.matched === true)      query = query.not("matched_item_id", "is", null);
+  if (filters?.matched === false)     query = query.is("matched_item_id", null);
+  if (filters?.fromDate)              query = query.gte("sold_at", filters.fromDate);
+  if (filters?.toDate)                query = query.lte("sold_at", filters.toDate);
+
+  const { data, error } = await query;
+  if (error) {
+    console.error("[marketplaceStore] getPlatformSales failed:", error.message);
+    return [];
+  }
+  return (data ?? []).map(rowToSale);
 }
 
 export async function getPlatformSaleById(id: string): Promise<PlatformSale | null> {
-  const store = await readMarketplaceStore();
-  return store.platformSales.find((s) => s.id === id) ?? null;
+  noStore();
+  const { data, error } = await supabase
+    .from("platform_sales")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) return null;
+  return rowToSale(data);
 }
 
 export async function createPlatformSale(
   data: Omit<PlatformSale, "id" | "createdAt" | "updatedAt">
 ): Promise<PlatformSale> {
-  const store = await readMarketplaceStore();
   const now = new Date().toISOString();
-  const sale: PlatformSale = { ...data, id: randomUUID(), createdAt: now, updatedAt: now };
-  store.platformSales.push(sale);
-  await writeMarketplaceStore(store);
-  return sale;
+  const row = {
+    id: randomUUID(),
+    account_id: data.accountId,
+    platform: data.platform,
+    external_sale_id: data.externalSaleId ?? null,
+    title: data.title,
+    sku: data.sku ?? null,
+    brand: data.brand ?? null,
+    size: data.size ?? null,
+    amount: data.amount,
+    currency: data.currency,
+    sold_at: data.soldAt,
+    raw_payload: data.rawPayload ?? null,
+    matched_item_id: data.matchedItemId ?? null,
+    created_at: now,
+    updated_at: now,
+  };
+
+  const { data: inserted, error } = await supabase
+    .from("platform_sales")
+    .insert(row)
+    .select()
+    .single();
+
+  if (error || !inserted) {
+    console.error("[marketplaceStore] createPlatformSale failed:", error?.message);
+    throw error;
+  }
+  return rowToSale(inserted);
 }
 
 export async function updatePlatformSale(
   id: string,
   data: Partial<Omit<PlatformSale, "id" | "createdAt">>
 ): Promise<PlatformSale | null> {
-  const store = await readMarketplaceStore();
-  const idx = store.platformSales.findIndex((s) => s.id === id);
-  if (idx === -1) return null;
-  store.platformSales[idx] = { ...store.platformSales[idx], ...data, id, updatedAt: new Date().toISOString() };
-  await writeMarketplaceStore(store);
-  return store.platformSales[idx];
+  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if ("externalSaleId" in data)    patch.external_sale_id = data.externalSaleId ?? null;
+  if (data.title !== undefined)    patch.title = data.title;
+  if ("sku" in data)               patch.sku = data.sku ?? null;
+  if ("brand" in data)             patch.brand = data.brand ?? null;
+  if ("size" in data)              patch.size = data.size ?? null;
+  if (data.amount !== undefined)   patch.amount = data.amount;
+  if (data.currency !== undefined) patch.currency = data.currency;
+  if (data.soldAt !== undefined)   patch.sold_at = data.soldAt;
+  if ("rawPayload" in data)        patch.raw_payload = data.rawPayload ?? null;
+  if ("matchedItemId" in data)     patch.matched_item_id = data.matchedItemId ?? null;
+
+  const { data: updated, error } = await supabase
+    .from("platform_sales")
+    .update(patch)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error || !updated) {
+    console.error("[marketplaceStore] updatePlatformSale failed:", error?.message);
+    return null;
+  }
+  return rowToSale(updated);
 }
 
 export async function linkSaleToItem(saleId: string, itemId: string | null): Promise<PlatformSale | null> {
@@ -204,10 +316,18 @@ export async function linkSaleToItem(saleId: string, itemId: string | null): Pro
 // ─── Activity logs ────────────────────────────────────────────────────────────
 
 export async function getActivityLogs(accountId: string): Promise<ActivityLog[]> {
-  const store = await readMarketplaceStore();
-  return (store.activityLogs ?? [])
-    .filter((l) => l.accountId === accountId)
-    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  noStore();
+  const { data, error } = await supabase
+    .from("activity_logs")
+    .select("*")
+    .eq("account_id", accountId)
+    .order("timestamp", { ascending: false });
+
+  if (error) {
+    console.error("[marketplaceStore] getActivityLogs failed:", error.message);
+    return [];
+  }
+  return (data ?? []).map(rowToLog);
 }
 
 export async function addActivityLog(
@@ -217,18 +337,25 @@ export async function addActivityLog(
   status: LogStatus = "info",
   metadata?: Record<string, unknown>
 ): Promise<ActivityLog> {
-  const store = await readMarketplaceStore();
-  const log: ActivityLog = {
+  const row = {
     id: randomUUID(),
-    accountId,
+    account_id: accountId,
     action,
     detail,
     status,
     timestamp: new Date().toISOString(),
-    ...(metadata ? { metadata } : {}),
+    metadata: metadata ?? null,
   };
-  if (!store.activityLogs) store.activityLogs = [];
-  store.activityLogs.push(log);
-  await writeMarketplaceStore(store);
-  return log;
+
+  const { data: inserted, error } = await supabase
+    .from("activity_logs")
+    .insert(row)
+    .select()
+    .single();
+
+  if (error || !inserted) {
+    console.error("[marketplaceStore] addActivityLog failed:", error?.message);
+    throw error;
+  }
+  return rowToLog(inserted);
 }
