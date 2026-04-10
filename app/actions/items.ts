@@ -2,20 +2,35 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getAllItems, createItem, updateItem, deleteItem, getItemById } from "@/lib/services/inventoryService";
-import type { InventoryStatus } from "@/lib/models";
+import { getAllItems, createItem, updateItem, deleteItem, getItemById } from "@/lib/services/inventory";
+import type { InventoryStatus } from "@/lib/types/inventory";
 
-/** Delete Vercel Blob images that were removed from an item's image list. */
-async function deleteRemovedBlobImages(oldUrls: string[], newUrls: string[]) {
+const SUPABASE_STORAGE_HOST = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
+  : null;
+
+/** Delete Supabase Storage images that were removed from an item's image list. */
+async function deleteRemovedStorageImages(oldUrls: string[], newUrls: string[]) {
   const removed = oldUrls.filter(
-    (url) => !newUrls.includes(url) && url.includes("blob.vercel-storage.com")
+    (url) =>
+      !newUrls.includes(url) &&
+      SUPABASE_STORAGE_HOST !== null &&
+      url.includes(SUPABASE_STORAGE_HOST)
   );
   if (!removed.length) return;
   try {
-    const { del } = await import("@vercel/blob");
-    await del(removed);
+    const { supabase } = await import("@/lib/supabase");
+    // Extract the storage path from each public URL
+    // Public URL format: https://<project>.supabase.co/storage/v1/object/public/product-images/<path>
+    const paths = removed.map((url) => {
+      const marker = "/object/public/product-images/";
+      const idx = url.indexOf(marker);
+      return idx !== -1 ? url.slice(idx + marker.length) : url;
+    });
+    const { error } = await supabase.storage.from("product-images").remove(paths);
+    if (error) console.error("[items] Failed to delete storage images:", error);
   } catch (err) {
-    console.error("[items] Failed to delete removed blob images:", err);
+    console.error("[items] Failed to delete storage images:", err);
   }
 }
 
@@ -70,8 +85,8 @@ export async function updateItemAction(id: string, formData: FormData) {
 
   await updateItem(id, data);
 
-  // Delete any Blob-hosted images that were removed from this listing
-  await deleteRemovedBlobImages(oldImages, data.images);
+  // Delete any storage-hosted images that were removed from this listing
+  await deleteRemovedStorageImages(oldImages, data.images);
 
   revalidatePath("/", "layout");
   redirect("/admin/items");
@@ -81,7 +96,7 @@ export async function deleteItemAction(id: string) {
   // Delete all Blob images for this item when the item itself is deleted
   const existing = await getItemById(id);
   const oldImages = existing?.images ?? [];
-  await deleteRemovedBlobImages(oldImages, []);
+  await deleteRemovedStorageImages(oldImages, []);
 
   await deleteItem(id);
   revalidatePath("/", "layout");

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import type { MarketplaceAccount } from "@/lib/marketplaceModels";
+import type { MarketplaceAccount } from "@/lib/types/marketplace";
 
 interface Props {
   accounts: MarketplaceAccount[];

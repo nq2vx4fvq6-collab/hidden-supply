@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { getAllItems } from "@/lib/services/inventoryService";
-import type { InventoryStatus } from "@/lib/models";
+import { getAllItems } from "@/lib/services/inventory";
+import type { InventoryStatus } from "@/lib/types/inventory";
 import DeleteButton from "@/components/admin/DeleteButton";
 import QuickStatusSelect from "@/components/admin/QuickStatusSelect";
 import MarkSoldButton from "@/components/admin/MarkSoldButton";

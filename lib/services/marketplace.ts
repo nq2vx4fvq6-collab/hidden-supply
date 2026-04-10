@@ -8,7 +8,7 @@ import type {
   LogAction,
   LogStatus,
   Platform,
-} from "@/lib/marketplaceModels";
+} from "@/lib/types/marketplace";
 
 type Row = Record<string, unknown>;
 

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getItemById } from "@/lib/services/inventoryService";
+import { getItemById } from "@/lib/services/inventory";
 import Header from "@/components/catalog/Header";
 import StatusBadge from "@/components/ui/StatusBadge";
 import ImageGallery from "@/components/catalog/ImageGallery";

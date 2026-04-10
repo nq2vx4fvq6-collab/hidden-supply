@@ -5,8 +5,8 @@ import {
   updateAccount,
   createPlatformSale,
   addActivityLog,
-} from "@/lib/services/marketplaceStore";
-import { getEbayAccessToken, fetchEbayOrders, ebayOrderToSaleFields } from "@/lib/services/ebayService";
+} from "@/lib/services/marketplace";
+import { getEbayAccessToken, fetchEbayOrders, ebayOrderToSaleFields } from "@/lib/services/ebay";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));

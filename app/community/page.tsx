@@ -109,7 +109,7 @@ export default function CommunityPage() {
                 </p>
                 <div className="mt-9 flex flex-wrap items-center gap-3">
                   <a
-                    href="https://discord.gg/426UY8Eshk"
+                    href="https://discord.gg/W3WkSyUB"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2.5 bg-[#050608] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#F6F1E6] transition-all duration-200 hover:bg-[#86C15A] hover:text-[#050608] active:scale-[0.97]"
@@ -226,7 +226,7 @@ export default function CommunityPage() {
 
             <div className="mt-14 flex justify-center">
               <a
-                href="https://discord.gg/426UY8Eshk"
+                href="https://discord.gg/W3WkSyUB"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2.5 bg-[#86C15A] px-8 py-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#050608] transition-all duration-200 hover:opacity-85 active:scale-[0.97]"
@@ -307,7 +307,7 @@ export default function CommunityPage() {
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <a
-                href="https://discord.gg/426UY8Eshk"
+                href="https://discord.gg/W3WkSyUB"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2.5 bg-[#86C15A] px-8 py-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#050608] transition-all duration-200 hover:opacity-85 active:scale-[0.97]"

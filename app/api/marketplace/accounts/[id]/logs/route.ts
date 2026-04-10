@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getActivityLogs, addActivityLog } from "@/lib/services/marketplaceStore";
+import { getActivityLogs, addActivityLog } from "@/lib/services/marketplace";
 
 export async function GET(
   _req: NextRequest,

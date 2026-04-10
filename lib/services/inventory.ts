@@ -7,8 +7,8 @@ import {
   fetchItemsFromSheet,
   appendItemToSheet,
   updateItemInSheet,
-} from "@/lib/services/googleSheetsService";
-import type { Item, ItemFilters, InventoryStatus } from "@/lib/models";
+} from "@/lib/services/googleSheets";
+import type { Item, ItemFilters, InventoryStatus } from "@/lib/types/inventory";
 
 // ─── Row ↔ Item mappers ───────────────────────────────────────────────────────
 

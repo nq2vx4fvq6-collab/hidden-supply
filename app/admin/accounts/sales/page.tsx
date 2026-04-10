@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getPlatformSales, getAllAccounts } from "@/lib/services/marketplaceStore";
+import { getPlatformSales, getAllAccounts } from "@/lib/services/marketplace";
 import PlatformBadge from "@/components/marketplace/PlatformBadge";
 import SalesMonitorFilters from "@/components/marketplace/SalesMonitorFilters";
 

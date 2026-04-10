@@ -85,7 +85,7 @@ export default function Header() {
           </Link>
 
           <a
-            href="https://discord.gg/426UY8Eshk"
+            href="https://discord.gg/W3WkSyUB"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-press flex items-center gap-2 bg-[#050608] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#F6F1E6] transition-colors duration-200 hover:bg-[#86C15A] hover:text-[#050608]"

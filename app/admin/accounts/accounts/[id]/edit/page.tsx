@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAccountById } from "@/lib/services/marketplaceStore";
+import { getAccountById } from "@/lib/services/marketplace";
 import PlatformBadge from "@/components/marketplace/PlatformBadge";
 import EditAccountForm from "@/components/marketplace/EditAccountForm";
 import DeleteAccountButton from "@/components/marketplace/DeleteAccountButton";

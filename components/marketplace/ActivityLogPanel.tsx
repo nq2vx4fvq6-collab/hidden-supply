@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { ActivityLog, LogAction, LogStatus } from "@/lib/marketplaceModels";
+import type { ActivityLog, LogAction, LogStatus } from "@/lib/types/marketplace";
 
 const ACTION_LABELS: Record<LogAction, string> = {
   account_created:      "Account created",

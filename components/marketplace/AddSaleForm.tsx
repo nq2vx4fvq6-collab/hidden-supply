@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { MarketplaceAccount } from "@/lib/marketplaceModels";
+import type { MarketplaceAccount } from "@/lib/types/marketplace";
 
 interface Props {
   accounts: MarketplaceAccount[];

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { createPlatformSale } from "@/lib/services/marketplaceStore";
-import type { Platform } from "@/lib/marketplaceModels";
+import { createPlatformSale } from "@/lib/services/marketplace";
+import type { Platform } from "@/lib/types/marketplace";
 
 function parseBody(req: NextRequest): Promise<{
   accountId: string;

@@ -1,4 +1,4 @@
-import type { ExcelColumnMapping } from "@/lib/models";
+import type { ExcelColumnMapping } from "@/lib/types/inventory";
 
 export const excelColumnsConfig: ExcelColumnMapping = {
   id: "ID",

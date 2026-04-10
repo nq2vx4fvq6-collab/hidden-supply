@@ -1,4 +1,4 @@
-import type { InventoryStatus } from "@/lib/models";
+import type { InventoryStatus } from "@/lib/types/inventory";
 
 const config: Record<InventoryStatus, { label: string; classes: string }> = {
   available: {

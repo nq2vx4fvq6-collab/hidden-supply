@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getStats, getAllItems } from "@/lib/services/inventoryService";
+import { getStats, getAllItems } from "@/lib/services/inventory";
 import StatusBadge from "@/components/ui/StatusBadge";
 import AdminDashboardCharts from "@/components/admin/AdminDashboardCharts";
 import AdminExpandableStats from "@/components/admin/AdminExpandableStats";

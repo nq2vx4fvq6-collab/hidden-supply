@@ -1,5 +1,5 @@
-import { isSheetsConfigured } from "@/lib/services/googleSheetsService";
-import { getAllAccounts, getPlatformSales } from "@/lib/services/marketplaceStore";
+import { isSheetsConfigured } from "@/lib/services/googleSheets";
+import { getAllAccounts, getPlatformSales } from "@/lib/services/marketplace";
 import RefreshSheetsButton from "@/components/admin/RefreshSheetsButton";
 import SharePointConnectButton from "@/components/admin/SharePointConnectButton";
 import Link from "next/link";

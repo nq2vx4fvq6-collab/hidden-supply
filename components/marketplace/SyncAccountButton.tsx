@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { Platform } from "@/lib/marketplaceModels";
+import type { Platform } from "@/lib/types/marketplace";
 
 interface Props {
   accountId: string;

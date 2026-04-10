@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { getPlatformSales } from "@/lib/services/marketplaceStore";
-import { getAllItems } from "@/lib/services/inventoryService";
+import { getPlatformSales } from "@/lib/services/marketplace";
+import { getAllItems } from "@/lib/services/inventory";
 import SupplyCrossCheckList from "@/components/marketplace/SupplyCrossCheckList";
 
 export const dynamic = "force-dynamic";

@@ -3,8 +3,8 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import type { PlatformSale } from "@/lib/marketplaceModels";
-import type { Item } from "@/lib/models";
+import type { PlatformSale } from "@/lib/types/marketplace";
+import type { Item } from "@/lib/types/inventory";
 import PlatformBadge from "@/components/marketplace/PlatformBadge";
 
 interface Props {

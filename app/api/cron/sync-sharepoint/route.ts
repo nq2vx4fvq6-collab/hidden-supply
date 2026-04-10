@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
-import { importItemsFromExcel } from "@/lib/services/excelService";
-import { createItem, updateItem, getAllItems } from "@/lib/services/inventoryService";
+import { importItemsFromExcel } from "@/lib/services/excel";
+import { createItem, updateItem, getAllItems } from "@/lib/services/inventory";
 import {
   getAccessToken,
   getExcelContentBySharingUrl,
   tryDirectFetch,
-} from "@/lib/services/sharePointService";
-import type { InventoryStatus } from "@/lib/models";
+} from "@/lib/services/sharepoint";
+import type { InventoryStatus } from "@/lib/types/inventory";
 
 /** Vercel Cron sends Authorization: Bearer <CRON_SECRET>. Also allow GET/POST with same header. */
 function isAuthorized(req: NextRequest): boolean {

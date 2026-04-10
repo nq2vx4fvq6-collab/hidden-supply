@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { updateAccount, deleteAccount, addActivityLog } from "@/lib/services/marketplaceStore";
+import { updateAccount, deleteAccount, addActivityLog } from "@/lib/services/marketplace";
 
 export async function PATCH(
   req: NextRequest,

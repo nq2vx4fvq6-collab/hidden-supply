@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getAllItems } from "@/lib/services/inventoryService";
-import { exportItemsToExcel } from "@/lib/services/excelService";
+import { getAllItems } from "@/lib/services/inventory";
+import { exportItemsToExcel } from "@/lib/services/excel";
 
 export async function GET() {
   const items = await getAllItems();

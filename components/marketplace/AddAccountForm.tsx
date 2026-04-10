@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { MarketplaceAccount } from "@/lib/marketplaceModels";
+import type { MarketplaceAccount } from "@/lib/types/marketplace";
 
 interface PlatformOption {
   value: "ebay" | "poshmark" | "stockx" | "grailed" | "depop";

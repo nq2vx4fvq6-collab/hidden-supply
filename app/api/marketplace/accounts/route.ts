@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { createAccount } from "@/lib/services/marketplaceStore";
-import type { Platform } from "@/lib/marketplaceModels";
+import { createAccount } from "@/lib/services/marketplace";
+import type { Platform } from "@/lib/types/marketplace";
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
