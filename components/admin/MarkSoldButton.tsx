@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { InventoryStatus } from "@/lib/models";
+import type { InventoryStatus } from "@/lib/types/inventory";
 
 export default function MarkSoldButton({
   id,

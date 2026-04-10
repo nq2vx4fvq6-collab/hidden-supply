@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { getAllItems } from "@/lib/services/inventoryService";
-import type { ItemFilters, InventoryStatus } from "@/lib/models";
+import { getAllItems } from "@/lib/services/inventory";
+import type { ItemFilters, InventoryStatus } from "@/lib/types/inventory";
 import Header from "@/components/catalog/Header";
 import CatalogFilters from "@/components/catalog/CatalogFilters";
 import StatusBadge from "@/components/ui/StatusBadge";
@@ -89,7 +89,7 @@ export default async function Home({ searchParams }: HomeProps) {
                   </svg>
                 </Link>
                 <a
-                  href="https://discord.gg/426UY8Eshk"
+                  href="https://discord.gg/W3WkSyUB"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2.5 border border-[rgba(5,6,8,0.18)] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#050608] transition-all duration-200 hover:border-[#050608] hover:bg-[#050608] hover:text-[#F6F1E6] active:scale-[0.97]"
@@ -115,7 +115,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 {items[1] && (
                   <a
                     href={`/item/${items[1].id}`}
-                    className="group/back absolute right-0 bottom-0 z-[5] block w-[220px] h-[290px] rounded-2xl"
+                    className="group/back absolute right-0 bottom-0 z-[5] hover:z-20 block w-[220px] h-[290px] rounded-2xl"
                     aria-label={`${items[1].brand} – ${items[1].name}`}
                   >
                     {/* Visual card — translates on hover of the static outer <a> */}
@@ -366,12 +366,14 @@ export default async function Home({ searchParams }: HomeProps) {
                 all in one private channel built for operators who move volume.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href="#"
+                <a
+                  href="https://discord.gg/W3WkSyUB"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center gap-2.5 bg-[#86C15A] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#050608] transition-all duration-200 hover:opacity-85 active:scale-[0.97]"
                 >
                   Join Discord
-                </Link>
+                </a>
                 <Link
                   href="/#inventory"
                   className="flex items-center gap-2.5 border border-[rgba(246,241,230,0.15)] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#F6F1E6] transition-all duration-200 hover:border-[#F6F1E6] active:scale-[0.97]"

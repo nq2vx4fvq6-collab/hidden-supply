@@ -1,4 +1,4 @@
-import type { Item } from "@/lib/models";
+import type { Item } from "@/lib/types/inventory";
 import ItemImageEditor from "@/components/admin/ItemImageEditor";
 
 const BRANDS = [

@@ -7,8 +7,8 @@ import {
   updateAccount,
   deleteAccount,
   createPlatformSale,
-} from "@/lib/services/marketplaceStore";
-import type { Platform } from "@/lib/marketplaceModels";
+} from "@/lib/services/marketplace";
+import type { Platform } from "@/lib/types/marketplace";
 
 const ACCOUNTS_PATH = "/admin/accounts";
 const ACCOUNTS_LIST_PATH = "/admin/accounts/accounts";

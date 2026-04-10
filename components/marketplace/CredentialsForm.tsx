@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { MarketplaceAccount } from "@/lib/marketplaceModels";
+import type { MarketplaceAccount } from "@/lib/types/marketplace";
 
 interface Props {
   account: MarketplaceAccount;

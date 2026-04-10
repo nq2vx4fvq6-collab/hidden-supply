@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { getAllAccounts, getPlatformSales } from "@/lib/services/marketplaceStore";
-import type { Platform } from "@/lib/marketplaceModels";
+import { getAllAccounts, getPlatformSales } from "@/lib/services/marketplace";
+import type { Platform } from "@/lib/types/marketplace";
 
 export const dynamic = "force-dynamic";
 

@@ -1,4 +1,4 @@
-import type { Platform } from "@/lib/marketplaceModels";
+import type { Platform } from "@/lib/types/marketplace";
 
 const LABELS: Record<Platform, string> = {
   ebay: "eBay",

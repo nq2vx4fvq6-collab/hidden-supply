@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx";
-import { excelColumnsConfig } from "@/lib/config/excelColumnsConfig";
-import type { Item } from "@/lib/models";
+import { excelColumnsConfig } from "@/lib/config/excelColumns";
+import type { Item } from "@/lib/types/inventory";
 
 type ColKey = keyof typeof excelColumnsConfig;
 

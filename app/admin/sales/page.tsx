@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getAllItems } from "@/lib/services/inventoryService";
+import { getAllItems } from "@/lib/services/inventory";
 
 export const dynamic = "force-dynamic";
 

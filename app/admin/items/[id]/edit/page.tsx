@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getItemById } from "@/lib/services/inventoryService";
+import { getItemById } from "@/lib/services/inventory";
 import ItemFormFields from "@/components/admin/ItemFormFields";
 import { updateItemAction } from "@/app/actions/items";
 

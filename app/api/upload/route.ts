@@ -1,9 +1,10 @@
-import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
+import { supabase } from "@/lib/supabase";
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const BUCKET = "product-images";
 
 export async function POST(request: Request) {
   try {
@@ -28,44 +29,28 @@ export async function POST(request: Request) {
     }
 
     const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const pathname = `products/${filename}`;
+    const storagePath = `products/${filename}`;
 
-    // Prefer Vercel Blob when token is set (production or dev with token)
-    if (process.env.BLOB_READ_WRITE_TOKEN) {
-      try {
-        const blob = await put(pathname, file, {
-          access: "public",
-          addRandomSuffix: false,
-          contentType,
-        });
-        return NextResponse.json({ url: blob.url });
-      } catch (blobErr) {
-        // On Vercel, Blob is required; locally fall back to filesystem if Blob fails (e.g. invalid token)
-        if (process.env.VERCEL) {
-          console.error("[upload] Blob failed", blobErr);
-          return NextResponse.json(
-            {
-              error:
-                blobErr instanceof Error
-                  ? blobErr.message
-                  : "Upload failed. If deploying to Vercel, add a Blob store and set BLOB_READ_WRITE_TOKEN.",
-            },
-            { status: 500 }
-          );
-        }
-        // Fall through to filesystem fallback
-      }
-    }
-
-    // Vercel without Blob token: ask them to configure it
     if (process.env.VERCEL) {
-      return NextResponse.json(
-        {
-          error:
-            "Image upload is not configured. In Vercel, go to Storage → Create Blob store, then add BLOB_READ_WRITE_TOKEN to your project environment variables. Redeploy and try again.",
-        },
-        { status: 503 }
-      );
+      // Production: upload to Supabase Storage
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const { error } = await supabase.storage
+        .from(BUCKET)
+        .upload(storagePath, buffer, {
+          contentType,
+          upsert: false,
+        });
+
+      if (error) {
+        console.error("[upload] Supabase Storage upload failed:", error);
+        return NextResponse.json(
+          { error: error.message || "Upload failed." },
+          { status: 500 }
+        );
+      }
+
+      const { data } = supabase.storage.from(BUCKET).getPublicUrl(storagePath);
+      return NextResponse.json({ url: data.publicUrl });
     }
 
     // Local dev: save to public/uploads so images are visible
@@ -74,8 +59,7 @@ export async function POST(request: Request) {
     const filePath = path.join(dir, filename);
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(filePath, buffer);
-    const url = `/uploads/products/${filename}`;
-    return NextResponse.json({ url });
+    return NextResponse.json({ url: `/uploads/products/${filename}` });
   } catch (err) {
     console.error("[upload]", err);
     return NextResponse.json(

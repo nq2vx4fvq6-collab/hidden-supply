@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllItems, createItem } from "@/lib/services/inventoryService";
-import type { ItemFilters, InventoryStatus } from "@/lib/models";
+import { getAllItems, createItem } from "@/lib/services/inventory";
+import type { ItemFilters, InventoryStatus } from "@/lib/types/inventory";
 
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;

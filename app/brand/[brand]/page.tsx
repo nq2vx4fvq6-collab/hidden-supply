@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getAllItems } from "@/lib/services/inventoryService";
-import type { ItemFilters, InventoryStatus } from "@/lib/models";
+import { getAllItems } from "@/lib/services/inventory";
+import type { ItemFilters, InventoryStatus } from "@/lib/types/inventory";
 import Header from "@/components/catalog/Header";
 import CatalogFilters from "@/components/catalog/CatalogFilters";
 import StatusBadge from "@/components/ui/StatusBadge";

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
-import { importItemsFromExcel } from "@/lib/services/excelService";
-import { createItem, updateItem, getAllItems, clearAllItems } from "@/lib/services/inventoryService";
-import type { InventoryStatus, Item } from "@/lib/models";
+import { importItemsFromExcel } from "@/lib/services/excel";
+import { createItem, updateItem, getAllItems, clearAllItems } from "@/lib/services/inventory";
+import type { InventoryStatus, Item } from "@/lib/types/inventory";
 
 export async function POST(req: NextRequest) {
   let formData: FormData;
