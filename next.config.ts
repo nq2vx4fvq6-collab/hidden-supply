@@ -27,6 +27,14 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Ensure the client-side router cache never serves stale data for
+    // dynamic pages — without this, navigating back to /admin/items
+    // after a save can show the pre-save version from the router cache.
+    staleTimes: {
+      dynamic: 0,
+    },
+  },
   async headers() {
     return [
       {

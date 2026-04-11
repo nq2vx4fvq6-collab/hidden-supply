@@ -3,11 +3,20 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAllItems, createItem, updateItem, deleteItem, getItemById } from "@/lib/services/inventory";
+import { invalidateSheetsCache } from "@/lib/services/googleSheets";
 import type { InventoryStatus } from "@/lib/types/inventory";
 
 const SUPABASE_STORAGE_HOST = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
   : null;
+
+/** Bust every relevant cache layer after any inventory mutation. */
+function revalidateInventory() {
+  invalidateSheetsCache();
+  revalidatePath("/admin", "layout");     // all admin pages
+  revalidatePath("/admin/items", "page"); // items list specifically
+  revalidatePath("/", "layout");          // public catalog
+}
 
 /** Delete Supabase Storage images that were removed from an item's image list. */
 async function deleteRemovedStorageImages(oldUrls: string[], newUrls: string[]) {
@@ -72,41 +81,32 @@ function parseFormData(formData: FormData) {
 export async function createItemAction(formData: FormData) {
   const data = parseFormData(formData);
   await createItem(data);
-  revalidatePath("/", "layout");
+  revalidateInventory();
   redirect("/admin/items");
 }
 
 export async function updateItemAction(id: string, formData: FormData) {
   const data = parseFormData(formData);
 
-  // Fetch old images before overwriting so we can clean up removed Blob files
   const existing = await getItemById(id);
   const oldImages = existing?.images ?? [];
 
   await updateItem(id, data);
-
-  // Delete any storage-hosted images that were removed from this listing
   await deleteRemovedStorageImages(oldImages, data.images);
 
-  revalidatePath("/", "layout");
+  revalidateInventory();
   redirect("/admin/items");
 }
 
 export async function deleteItemAction(id: string) {
-  // Delete all Blob images for this item when the item itself is deleted
   const existing = await getItemById(id);
   const oldImages = existing?.images ?? [];
   await deleteRemovedStorageImages(oldImages, []);
 
   await deleteItem(id);
-  revalidatePath("/", "layout");
+  revalidateInventory();
 }
 
-/**
- * Scans every item and removes image URLs that are not valid https:// links
- * (e.g. old local /uploads/... paths that only worked in dev).
- * Returns the number of items that were cleaned up.
- */
 export async function purgeInvalidImagesAction(): Promise<{ cleaned: number }> {
   const items = await getAllItems();
   let cleaned = 0;
@@ -120,7 +120,7 @@ export async function purgeInvalidImagesAction(): Promise<{ cleaned: number }> {
     }
   }
 
-  revalidatePath("/", "layout");
+  revalidateInventory();
   return { cleaned };
 }
 
@@ -140,6 +140,5 @@ export async function bulkUpdateStatusAction(formData: FormData) {
   for (const id of ids) {
     await updateItem(id, { status });
   }
-  revalidatePath("/", "layout");
-  revalidatePath("/admin/items");
+  revalidateInventory();
 }
