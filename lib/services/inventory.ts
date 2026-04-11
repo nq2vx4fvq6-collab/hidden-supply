@@ -64,6 +64,7 @@ function itemToRow(item: Partial<Item> & { id: string }) {
 // ─── Read source (Sheets → Supabase) ─────────────────────────────────────────
 
 async function getItemsSource(): Promise<Item[]> {
+  noStore();
   if (isSheetsConfigured()) {
     try {
       return await fetchItemsFromSheet();
@@ -71,7 +72,6 @@ async function getItemsSource(): Promise<Item[]> {
       // fall through to Supabase
     }
   }
-  noStore();
   const { data, error } = await supabase
     .from("items")
     .select("*")
