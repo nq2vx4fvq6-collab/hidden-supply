@@ -119,7 +119,7 @@ New env vars added in the Vercel dashboard require a redeploy to take effect in 
 - **Local-only image fallback:** dev image uploads can land in `public/uploads/products/` when Supabase Storage is unavailable.
 
 ### Auth (admin)
-- `middleware.ts` at the project root protects `/admin/*` (except `/admin/login`) and write API endpoints (`/api/upload`, `/api/import`, `/api/export`, and any non-GET `/api/items*`).
+- `proxy.ts` at the project root (Next.js 16 convention, replaced the old `middleware.ts`) protects `/admin/*` (except `/admin/login`) and write API endpoints (`/api/upload`, `/api/import`, `/api/export`, and any non-GET `/api/items*`). Exports `proxy()` and `config`.
 - Token = `SHA-256(password:secret)` stored in `httpOnly` cookie `us-admin-auth`.
 - Bot/scraper signatures are blocked by User-Agent — note `curl/` is in the blocklist, so curl-based tests must pass a real browser UA.
 - Env vars: `ADMIN_PASSWORD`, `SESSION_SECRET` (defaults exist for dev only — required in prod).
@@ -133,7 +133,7 @@ app/
   brand/, category/, item/     # Public catalog browse
   community/                   # Community pages
   login/                       # Auth UI
-  admin/                       # Protected by middleware
+  admin/                       # Protected by proxy.ts
     items/                     # Inventory CRUD
     accounts/                  # Marketplace account manager
     sales/                     # Sales view
