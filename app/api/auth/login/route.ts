@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getAdminPassword, getSessionSecret } from "@/lib/env";
 
 const COOKIE = "us-admin-auth";
 
 async function computeToken(password: string): Promise<string> {
-  const secret = process.env.SESSION_SECRET ?? "dev-secret-urban-supply";
   const enc = new TextEncoder();
   const buf = await crypto.subtle.digest(
     "SHA-256",
-    enc.encode(password + ":" + secret)
+    enc.encode(password + ":" + getSessionSecret())
   );
   return Array.from(new Uint8Array(buf))
     .map((b) => b.toString(16).padStart(2, "0"))
@@ -23,9 +23,8 @@ export async function POST(req: NextRequest) {
   }
 
   const entered = body.password ?? "";
-  const expected = process.env.ADMIN_PASSWORD ?? "admin";
 
-  if (entered !== expected) {
+  if (entered !== getAdminPassword()) {
     return NextResponse.json({ error: "Wrong password" }, { status: 401 });
   }
 

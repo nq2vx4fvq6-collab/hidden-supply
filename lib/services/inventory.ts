@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { unstable_noStore as noStore } from "next/cache";
-import { supabase } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 import { applyItemFilters } from "@/lib/services/filters";
 import {
   isSheetsConfigured,
@@ -72,7 +72,7 @@ async function getItemsSource(): Promise<Item[]> {
       // fall through to Supabase
     }
   }
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from("items")
     .select("*")
     .order("created_at", { ascending: false });
@@ -96,7 +96,7 @@ export async function getAllItems(filters?: ItemFilters): Promise<Item[]> {
 
 export async function getItemById(id: string): Promise<Item | undefined> {
   noStore();
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from("items")
     .select("*")
     .eq("id", id)
@@ -112,7 +112,7 @@ export async function createItem(
   const now = new Date().toISOString();
   const item: Item = { ...data, id: randomUUID(), createdAt: now, updatedAt: now };
 
-  const { error } = await supabase.from("items").insert(itemToRow(item));
+  const { error } = await getSupabaseClient().from("items").insert(itemToRow(item));
   if (error) {
     console.error("[inventoryService] createItem failed:", error.message);
     throw error;
@@ -136,7 +136,7 @@ export async function updateItem(
   const row = itemToRow({ ...data, id, updatedAt: now });
   delete row.id; // don't pass id in the update payload
 
-  const { data: updated, error } = await supabase
+  const { data: updated, error } = await getSupabaseClient()
     .from("items")
     .update(row)
     .eq("id", id)
@@ -159,7 +159,7 @@ export async function updateItem(
 }
 
 export async function deleteItem(id: string): Promise<boolean> {
-  const { error, count } = await supabase
+  const { error, count } = await getSupabaseClient()
     .from("items")
     .delete({ count: "exact" })
     .eq("id", id);
@@ -172,7 +172,7 @@ export async function deleteItem(id: string): Promise<boolean> {
 }
 
 export async function clearAllItems(): Promise<void> {
-  const { error } = await supabase.from("items").delete().neq("id", "");
+  const { error } = await getSupabaseClient().from("items").delete().neq("id", "");
   if (error) {
     console.error("[inventoryService] clearAllItems failed:", error.message);
     throw error;
