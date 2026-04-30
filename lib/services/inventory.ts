@@ -1,6 +1,13 @@
 import { randomUUID } from "crypto";
 import { unstable_noStore as noStore } from "next/cache";
-import { getSupabaseClient } from "@/lib/supabase";
+import {
+  readItemStore,
+  getItemRow,
+  insertItem,
+  updateItemRow,
+  deleteItemRow,
+  clearAllItemRows,
+} from "@/lib/services/itemStore";
 import { applyItemFilters } from "@/lib/services/filters";
 import {
   isSheetsConfigured,
@@ -10,58 +17,7 @@ import {
 } from "@/lib/services/googleSheets";
 import type { Item, ItemFilters, InventoryStatus } from "@/lib/types/inventory";
 
-// ─── Row ↔ Item mappers ───────────────────────────────────────────────────────
-
-function rowToItem(row: Record<string, unknown>): Item {
-  return {
-    id: row.id as string,
-    sku: row.sku as string,
-    brand: row.brand as string,
-    name: row.name as string,
-    category: row.category as string,
-    size: row.size as string,
-    condition: row.condition as string,
-    colorway: (row.colorway as string | null) ?? undefined,
-    cost: (row.cost as number | null) ?? undefined,
-    listPrice: (row.list_price as number | null) ?? undefined,
-    salePrice: (row.sale_price as number | null) ?? undefined,
-    status: row.status as Item["status"],
-    images: (row.images as string[]) ?? [],
-    acquisitionDate: (row.acquisition_date as string | null) ?? undefined,
-    soldDate: (row.sold_date as string | null) ?? undefined,
-    soldTo: (row.sold_to as string | null) ?? undefined,
-    notes: (row.notes as string | null) ?? undefined,
-    listedOnPlatforms: (row.listed_on_platforms as Item["listedOnPlatforms"]) ?? undefined,
-    createdAt: row.created_at as string,
-    updatedAt: row.updated_at as string,
-  };
-}
-
-function itemToRow(item: Partial<Item> & { id: string }) {
-  const row: Record<string, unknown> = { id: item.id };
-  if (item.sku !== undefined)              row.sku = item.sku;
-  if (item.brand !== undefined)            row.brand = item.brand;
-  if (item.name !== undefined)             row.name = item.name;
-  if (item.category !== undefined)         row.category = item.category;
-  if (item.size !== undefined)             row.size = item.size;
-  if (item.condition !== undefined)        row.condition = item.condition;
-  if ("colorway" in item)                  row.colorway = item.colorway ?? null;
-  if ("cost" in item)                      row.cost = item.cost ?? null;
-  if ("listPrice" in item)                 row.list_price = item.listPrice ?? null;
-  if ("salePrice" in item)                 row.sale_price = item.salePrice ?? null;
-  if (item.status !== undefined)           row.status = item.status;
-  if (item.images !== undefined)           row.images = item.images;
-  if ("acquisitionDate" in item)           row.acquisition_date = item.acquisitionDate ?? null;
-  if ("soldDate" in item)                  row.sold_date = item.soldDate ?? null;
-  if ("soldTo" in item)                    row.sold_to = item.soldTo ?? null;
-  if ("notes" in item)                     row.notes = item.notes ?? null;
-  if ("listedOnPlatforms" in item)         row.listed_on_platforms = item.listedOnPlatforms ?? null;
-  if (item.createdAt !== undefined)        row.created_at = item.createdAt;
-  if (item.updatedAt !== undefined)        row.updated_at = item.updatedAt;
-  return row;
-}
-
-// ─── Read source (Sheets → Supabase) ─────────────────────────────────────────
+// ─── Read source (Sheets → Store) ────────────────────────────────────────────
 
 async function getItemsSource(): Promise<Item[]> {
   noStore();
@@ -69,22 +25,13 @@ async function getItemsSource(): Promise<Item[]> {
     try {
       return await fetchItemsFromSheet();
     } catch {
-      // fall through to Supabase
+      // fall through to store (Supabase or JSON)
     }
   }
-  const { data, error } = await getSupabaseClient()
-    .from("items")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("[inventoryService] read failed:", error.message);
-    return [];
-  }
-  return (data ?? []).map(rowToItem);
+  return readItemStore();
 }
 
-// ─── Public API ───────────────────────────────────────────────────────────────
+// ─── Public API ──────────────────────────────────────────────────────────────
 
 export async function getAllItems(filters?: ItemFilters): Promise<Item[]> {
   const items = await getItemsSource();
@@ -96,14 +43,7 @@ export async function getAllItems(filters?: ItemFilters): Promise<Item[]> {
 
 export async function getItemById(id: string): Promise<Item | undefined> {
   noStore();
-  const { data, error } = await getSupabaseClient()
-    .from("items")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (error || !data) return undefined;
-  return rowToItem(data);
+  return getItemRow(id);
 }
 
 export async function createItem(
@@ -112,17 +52,13 @@ export async function createItem(
   const now = new Date().toISOString();
   const item: Item = { ...data, id: randomUUID(), createdAt: now, updatedAt: now };
 
-  const { error } = await getSupabaseClient().from("items").insert(itemToRow(item));
-  if (error) {
-    console.error("[inventoryService] createItem failed:", error.message);
-    throw error;
-  }
+  await insertItem(item);
 
   if (isSheetsConfigured()) {
     try {
       await appendItemToSheet(item);
     } catch (err) {
-      console.error("[inventoryService] push to sheet failed:", err);
+      console.error("[inventory] push to sheet failed:", err);
     }
   }
   return item;
@@ -132,51 +68,25 @@ export async function updateItem(
   id: string,
   data: Partial<Omit<Item, "id" | "createdAt">>
 ): Promise<Item | null> {
-  const now = new Date().toISOString();
-  const row = itemToRow({ ...data, id, updatedAt: now });
-  delete row.id; // don't pass id in the update payload
-
-  const { data: updated, error } = await getSupabaseClient()
-    .from("items")
-    .update(row)
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error || !updated) {
-    console.error("[inventoryService] updateItem failed:", error?.message);
-    return null;
-  }
+  const updated = await updateItemRow(id, { ...data, updatedAt: new Date().toISOString() });
+  if (!updated) return null;
 
   if (isSheetsConfigured()) {
     try {
       await updateItemInSheet(id, data);
     } catch (err) {
-      console.error("[inventoryService] update in sheet failed:", err);
+      console.error("[inventory] update in sheet failed:", err);
     }
   }
-  return rowToItem(updated);
+  return updated;
 }
 
 export async function deleteItem(id: string): Promise<boolean> {
-  const { error, count } = await getSupabaseClient()
-    .from("items")
-    .delete({ count: "exact" })
-    .eq("id", id);
-
-  if (error) {
-    console.error("[inventoryService] deleteItem failed:", error.message);
-    return false;
-  }
-  return (count ?? 0) > 0;
+  return deleteItemRow(id);
 }
 
 export async function clearAllItems(): Promise<void> {
-  const { error } = await getSupabaseClient().from("items").delete().neq("id", "");
-  if (error) {
-    console.error("[inventoryService] clearAllItems failed:", error.message);
-    throw error;
-  }
+  await clearAllItemRows();
 }
 
 export async function getStats() {
