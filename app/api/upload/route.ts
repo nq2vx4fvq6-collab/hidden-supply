@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
-import { supabase } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 const BUCKET = "product-images";
@@ -34,7 +34,8 @@ export async function POST(request: Request) {
     if (process.env.VERCEL) {
       // Production: upload to Supabase Storage
       const buffer = Buffer.from(await file.arrayBuffer());
-      const { error } = await supabase.storage
+      const sb = getSupabaseClient();
+      const { error } = await sb.storage
         .from(BUCKET)
         .upload(storagePath, buffer, {
           contentType,
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
         );
       }
 
-      const { data } = supabase.storage.from(BUCKET).getPublicUrl(storagePath);
+      const { data } = sb.storage.from(BUCKET).getPublicUrl(storagePath);
       return NextResponse.json({ url: data.publicUrl });
     }
 

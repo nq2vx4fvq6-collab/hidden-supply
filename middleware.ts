@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getAdminPassword, getSessionSecret } from "@/lib/env";
 
 const COOKIE = "us-admin-auth";
 
@@ -26,11 +27,10 @@ const BOT_SIGNATURES = [
 const PROTECTED_API = ["/api/upload", "/api/import", "/api/export"];
 
 async function computeToken(password: string): Promise<string> {
-  const secret = process.env.SESSION_SECRET ?? "dev-secret-urban-supply";
   const enc = new TextEncoder();
   const buf = await crypto.subtle.digest(
     "SHA-256",
-    enc.encode(password + ":" + secret)
+    enc.encode(password + ":" + getSessionSecret())
   );
   return Array.from(new Uint8Array(buf))
     .map((b) => b.toString(16).padStart(2, "0"))
@@ -39,8 +39,7 @@ async function computeToken(password: string): Promise<string> {
 
 async function isValidToken(token: string | undefined): Promise<boolean> {
   if (!token) return false;
-  const password = process.env.ADMIN_PASSWORD ?? "admin";
-  const expected = await computeToken(password);
+  const expected = await computeToken(getAdminPassword());
   return token === expected;
 }
 

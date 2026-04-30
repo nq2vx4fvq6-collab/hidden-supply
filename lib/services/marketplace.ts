@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { unstable_noStore as noStore } from "next/cache";
-import { supabase } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 import type {
   MarketplaceAccount,
   PlatformSale,
@@ -70,7 +70,7 @@ function rowToLog(row: Row): ActivityLog {
 
 export async function getAllAccounts(): Promise<MarketplaceAccount[]> {
   noStore();
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from("marketplace_accounts")
     .select("*")
     .order("created_at", { ascending: false });
@@ -84,7 +84,7 @@ export async function getAllAccounts(): Promise<MarketplaceAccount[]> {
 
 export async function getAccountById(id: string): Promise<MarketplaceAccount | null> {
   noStore();
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from("marketplace_accounts")
     .select("*")
     .eq("id", id)
@@ -96,7 +96,7 @@ export async function getAccountById(id: string): Promise<MarketplaceAccount | n
 
 export async function getAccountsByPlatform(platform: Platform): Promise<MarketplaceAccount[]> {
   noStore();
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from("marketplace_accounts")
     .select("*")
     .eq("platform", platform)
@@ -131,7 +131,7 @@ export async function createAccount(
     updated_at: now,
   };
 
-  const { data: inserted, error } = await supabase
+  const { data: inserted, error } = await getSupabaseClient()
     .from("marketplace_accounts")
     .insert(row)
     .select()
@@ -173,7 +173,7 @@ export async function updateAccount(
   if ("avatarUrl" in data)               patch.avatar_url = data.avatarUrl ?? null;
   if ("email" in data)                   patch.email = data.email ?? null;
 
-  const { data: updated, error } = await supabase
+  const { data: updated, error } = await getSupabaseClient()
     .from("marketplace_accounts")
     .update(patch)
     .eq("id", id)
@@ -188,7 +188,7 @@ export async function updateAccount(
 }
 
 export async function deleteAccount(id: string): Promise<boolean> {
-  const { error, count } = await supabase
+  const { error, count } = await getSupabaseClient()
     .from("marketplace_accounts")
     .delete({ count: "exact" })
     .eq("id", id);
@@ -212,7 +212,7 @@ export interface PlatformSaleFilters {
 
 export async function getPlatformSales(filters?: PlatformSaleFilters): Promise<PlatformSale[]> {
   noStore();
-  let query = supabase
+  let query = getSupabaseClient()
     .from("platform_sales")
     .select("*")
     .order("sold_at", { ascending: false });
@@ -234,7 +234,7 @@ export async function getPlatformSales(filters?: PlatformSaleFilters): Promise<P
 
 export async function getPlatformSaleById(id: string): Promise<PlatformSale | null> {
   noStore();
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from("platform_sales")
     .select("*")
     .eq("id", id)
@@ -266,7 +266,7 @@ export async function createPlatformSale(
     updated_at: now,
   };
 
-  const { data: inserted, error } = await supabase
+  const { data: inserted, error } = await getSupabaseClient()
     .from("platform_sales")
     .insert(row)
     .select()
@@ -295,7 +295,7 @@ export async function updatePlatformSale(
   if ("rawPayload" in data)        patch.raw_payload = data.rawPayload ?? null;
   if ("matchedItemId" in data)     patch.matched_item_id = data.matchedItemId ?? null;
 
-  const { data: updated, error } = await supabase
+  const { data: updated, error } = await getSupabaseClient()
     .from("platform_sales")
     .update(patch)
     .eq("id", id)
@@ -317,7 +317,7 @@ export async function linkSaleToItem(saleId: string, itemId: string | null): Pro
 
 export async function getActivityLogs(accountId: string): Promise<ActivityLog[]> {
   noStore();
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from("activity_logs")
     .select("*")
     .eq("account_id", accountId)
@@ -347,7 +347,7 @@ export async function addActivityLog(
     metadata: metadata ?? null,
   };
 
-  const { data: inserted, error } = await supabase
+  const { data: inserted, error } = await getSupabaseClient()
     .from("activity_logs")
     .insert(row)
     .select()
