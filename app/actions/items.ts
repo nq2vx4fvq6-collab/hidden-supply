@@ -28,7 +28,7 @@ async function deleteRemovedStorageImages(oldUrls: string[], newUrls: string[]) 
   );
   if (!removed.length) return;
   try {
-    const { supabase } = await import("@/lib/supabase");
+    const { getSupabaseClient } = await import("@/lib/supabase");
     // Extract the storage path from each public URL
     // Public URL format: https://<project>.supabase.co/storage/v1/object/public/product-images/<path>
     const paths = removed.map((url) => {
@@ -36,7 +36,7 @@ async function deleteRemovedStorageImages(oldUrls: string[], newUrls: string[]) 
       const idx = url.indexOf(marker);
       return idx !== -1 ? url.slice(idx + marker.length) : url;
     });
-    const { error } = await supabase.storage.from("product-images").remove(paths);
+    const { error } = await getSupabaseClient().storage.from("product-images").remove(paths);
     if (error) console.error("[items] Failed to delete storage images:", error);
   } catch (err) {
     console.error("[items] Failed to delete storage images:", err);
